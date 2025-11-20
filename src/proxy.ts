@@ -32,6 +32,11 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
+  // Send the user if they are not logged in from root to login anyways
+  if (pathname === "/" && !isLoggedIn) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
   return NextResponse.next();
 });
 
