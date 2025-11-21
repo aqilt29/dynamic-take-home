@@ -5,7 +5,7 @@ import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
 
 import data from "./data.json";
 import { redirect } from "next/navigation";

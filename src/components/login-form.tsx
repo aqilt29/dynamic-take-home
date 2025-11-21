@@ -1,6 +1,5 @@
 "use client";
 
-import { GalleryVerticalEnd } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState } from "react";
@@ -16,6 +15,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 export function LoginForm({
   className,
@@ -33,7 +33,6 @@ export function LoginForm({
     try {
       await signIn(provider, { callbackUrl: "/dashboard" });
     } catch (err) {
-      console.log("🚀 ~ handleOAuthSignIn ~ err:", err);
       setError("OAuth sign-in failed");
       setLoading(false);
     }
@@ -74,11 +73,16 @@ export function LoginForm({
               className="flex flex-col items-center gap-2 font-medium"
             >
               <div className="flex size-8 items-center justify-center rounded-md">
-                <GalleryVerticalEnd className="size-6" />
+                <Image
+                  src={"/favicon-32x32.png"}
+                  width={"32"}
+                  height={"32"}
+                  alt={"Dynamic Logo"}
+                />
               </div>
-              <span className="sr-only">Acme Inc.</span>
+              <span className="sr-only">Dynamic.xyz Demo</span>
             </a>
-            <h1 className="text-xl font-bold">Welcome to Acme Inc.</h1>
+            <h1 className="text-xl font-bold">Welcome to Dynamic.xyz Demo</h1>
             <FieldDescription>
               Don&apos;t have an account? <Link href="/signup">Sign up</Link>
             </FieldDescription>
