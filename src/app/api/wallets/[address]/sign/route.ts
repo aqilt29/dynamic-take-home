@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getAuthenticatedEvmClient } from "@/lib/dynamic-client";
-import { walletStorage } from "@/lib/wallet-store";
 import { baseSepolia } from "viem/chains";
 import { parseEther } from "viem";
 
@@ -18,13 +17,6 @@ export async function POST(request: Request, context: RouteContext) {
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Verify the wallet belongs to the user
-    const wallet = walletStorage.getByAddress(address);
-
-    if (!wallet || wallet.userId !== session.user.id) {
-      return NextResponse.json({ error: "Wallet not found" }, { status: 404 });
     }
 
     const { to, value } = body;
@@ -56,31 +48,17 @@ export async function POST(request: Request, context: RouteContext) {
       account: address as `0x${string}`,
     });
 
-    // Sign transaction with external server key shares
-    const signedTx = await evmClient.signTransaction({
-      senderAddress: address,
-      transaction: tx,
-      password: wallet.password,
-      externalServerKeyShares: wallet.externalServerKeyShares,
-    });
+    // TODO: Implement transaction signing with Dynamic's key management
+    // This requires fetching externalServerKeyShares from Dynamic's API
+    // or using delegated signing approach
 
-    // Send transaction
-    const txHash = await publicClient.sendRawTransaction({
-      serializedTransaction: signedTx as `0x${string}`,
-    });
-
-    // Wait for transaction receipt
-    const receipt = await publicClient.waitForTransactionReceipt({
-      hash: txHash,
-    });
-
-    return NextResponse.json({
-      success: true,
-      transactionHash: txHash,
-      status: receipt.status,
-      blockNumber: receipt.blockNumber.toString(),
-      gasUsed: receipt.gasUsed.toString(),
-    });
+    return NextResponse.json(
+      {
+        error: "Transaction signing not yet implemented",
+        message: "Server-side transaction signing requires additional key management setup"
+      },
+      { status: 501 }
+    );
   } catch (error) {
     console.error("Transaction signing error:", error);
     return NextResponse.json(

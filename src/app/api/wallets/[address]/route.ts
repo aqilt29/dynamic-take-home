@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getAuthenticatedEvmClient } from "@/lib/dynamic-client";
-import { walletStorage } from "@/lib/wallet-store";
 import { baseSepolia } from "viem/chains";
 import { formatEther } from "viem";
 
@@ -19,14 +18,7 @@ export async function GET(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Verify the wallet belongs to the user
-    const wallet = walletStorage.getByAddress(address);
-
-    if (!wallet || wallet.userId !== session.user.id) {
-      return NextResponse.json({ error: "Wallet not found" }, { status: 404 });
-    }
-
-    // Get wallet balance
+    // Get wallet balance from blockchain
     const evmClient = await getAuthenticatedEvmClient();
 
     const publicClient = evmClient.createViemPublicClient({
@@ -39,12 +31,11 @@ export async function GET(request: Request, context: RouteContext) {
     });
 
     return NextResponse.json({
-      address: wallet.address,
+      address,
       balance: formatEther(balance),
       balanceWei: balance.toString(),
       chain: baseSepolia.name,
       chainId: baseSepolia.id,
-      createdAt: wallet.createdAt,
     });
   } catch (error) {
     console.error("Error fetching wallet details:", error);

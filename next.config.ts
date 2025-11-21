@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Exclude Dynamic SDK from webpack bundling (contains native Node modules)
+  serverExternalPackages: [
+    "@dynamic-labs-wallet/node-evm",
+    "@dynamic-labs-wallet/core",
+  ],
 };
 
 export default nextConfig;
