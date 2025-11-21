@@ -94,12 +94,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
+        // Ensure image has a fallback value
+        if (!session.user.image) {
+          session.user.image = "https://picsum.photos/200";
+        }
       }
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
+        token.id = user.id;
       }
       return token;
     },
