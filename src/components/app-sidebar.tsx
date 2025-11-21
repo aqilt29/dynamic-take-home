@@ -1,12 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-  IconHome,
-  IconInnerShadowTop,
-  IconQuestionMark,
-  IconWallet,
-} from "@tabler/icons-react";
+import Image from "next/image";
+import { IconHome, IconQuestionMark, IconWallet } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -63,8 +59,15 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <Image
+                  src={"/favicon-32x32.png"}
+                  width={"32"}
+                  height={"32"}
+                  alt={"Dynamic Logo"}
+                />
+                <span className="text-base font-semibold">
+                  Dynamic.xyz Demo
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
