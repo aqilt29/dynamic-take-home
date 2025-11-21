@@ -21,18 +21,18 @@ const data = {
     {
       title: "Home",
       description: "dashboard",
-      url: "dashboard",
+      url: "/dashboard",
       icon: IconHome,
     },
     {
       title: "Wallets",
-      url: "wallets",
+      url: "/dashboard/wallets",
       description: "#",
       icon: IconWallet,
     },
     {
       title: "FAQs",
-      url: "faqs",
+      url: "/dashboard/faqs",
       description: "#",
       icon: IconQuestionMark,
     },

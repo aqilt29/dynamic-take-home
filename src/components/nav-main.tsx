@@ -30,25 +30,26 @@ export function NavMain({
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
           {items.map((item) => {
-            const isActive = pathname
-              .toLowerCase()
-              .includes(item.description.toLowerCase());
+            const isActive = pathname === item.url ||
+              (item.url !== '/dashboard' && pathname.startsWith(item.url));
 
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  tooltip={item.title}
-                  isActive={isActive}
-                  className={cn(
-                    "cursor-pointer",
-                    isActive
-                      ? "!bg-blue-700/80 !text-white hover:!bg-blue-900/80"
-                      : ""
-                  )}
-                >
-                  {item.icon && <item.icon />}
-                  <Link href={item.url}>{item.title}</Link>
-                </SidebarMenuButton>
+                <Link href={item.url}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    isActive={isActive}
+                    className={cn(
+                      "cursor-pointer",
+                      isActive
+                        ? "!bg-blue-700/80 !text-white hover:!bg-blue-900/80"
+                        : ""
+                    )}
+                  >
+                    {item.icon && <item.icon />}
+                    {item.title}
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             );
           })}
