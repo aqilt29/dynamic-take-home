@@ -55,8 +55,8 @@ openssl rand -base64 32
 #### Dynamic API Keys
 
 1. Go to [Dynamic Developer Dashboard](https://app.dynamic.xyz/dashboard/developer/api)
-2. Copy your **Environment ID** to `DYNAMIC_ENV_ID` in `.env.local`
-3. Generate or copy your **API Token** to `DYNAMIC_API_TOKEN` in `.env.local`
+2. Copy your **Environment ID** to `DYNAMIC_ENVIRONMENT_ID` in `.env.local`
+3. Generate or copy your **API Token** to `DYNAMIC_AUTH_TOKEN` in `.env.local`
 
 > [!WARNING]
 > without the credentials for either service the logins for those wont work
