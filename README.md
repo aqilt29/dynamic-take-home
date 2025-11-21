@@ -30,7 +30,7 @@ openssl rand -base64 32
 > only and works perfectly fine for demonstration purposes. I just wanted
 > to show off maybe a litle.
 
-### 3. OAuth Providers
+### 3. API Keys
 
 #### Google OAuth Setup
 
@@ -51,6 +51,12 @@ openssl rand -base64 32
    - Homepage URL: `http://localhost:3000`
    - Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
 4. Copy the **Client ID** and **Client Secret** to `.env.local`
+
+#### Dynamic API Keys
+
+1. Go to [Dynamic Developer Dashboard](https://app.dynamic.xyz/dashboard/developer/api)
+2. Copy your **Environment ID** to `DYNAMIC_ENV_ID` in `.env.local`
+3. Generate or copy your **API Token** to `DYNAMIC_API_TOKEN` in `.env.local`
 
 > [!WARNING]
 > without the credentials for either service the logins for those wont work
