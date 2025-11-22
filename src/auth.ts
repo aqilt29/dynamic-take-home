@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import * as jose from "jose";
 
 // This would normally be a database query
 // For demo purposes, I'll use in-memory store
@@ -20,6 +21,51 @@ class SignInError extends CredentialsSignin {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  session: {
+    strategy: "jwt",
+  },
+  jwt: {
+    async encode({ token, secret }) {
+      // Get private key from environment
+      const privateKeyBase64 = process.env.NEXTAUTH_JWT_PRIVATE_KEY;
+      if (!privateKeyBase64) {
+        throw new Error("NEXTAUTH_JWT_PRIVATE_KEY is not configured");
+      }
+
+      // Decode the base64 private key
+      const privateKeyPem = Buffer.from(privateKeyBase64, "base64").toString("utf-8");
+
+      // Import the private key
+      const privateKey = await jose.importPKCS8(privateKeyPem, "RS256");
+
+      // Sign the JWT with RS256
+      const jwt = await new jose.SignJWT(token as any)
+        .setProtectedHeader({ alg: "RS256", kid: "nextauth-rsa-key" })
+        .setIssuedAt()
+        .setExpirationTime("30d")
+        .sign(privateKey);
+
+      return jwt;
+    },
+    async decode({ token, secret }) {
+      // Get public key from environment
+      const publicKeyBase64 = process.env.NEXTAUTH_JWT_PUBLIC_KEY;
+      if (!publicKeyBase64) {
+        throw new Error("NEXTAUTH_JWT_PUBLIC_KEY is not configured");
+      }
+
+      // Decode the base64 public key
+      const publicKeyPem = Buffer.from(publicKeyBase64, "base64").toString("utf-8");
+
+      // Import the public key
+      const publicKey = await jose.importSPKI(publicKeyPem, "RS256");
+
+      // Verify and decode the JWT
+      const { payload } = await jose.jwtVerify(token!, publicKey);
+
+      return payload as any;
+    },
+  },
   providers: [
     Google,
     GitHub,
@@ -101,11 +147,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.sub = user.id;
         token.id = user.id;
+        token.email = user.email;
       }
+      // Add issuer for Dynamic external auth
+      token.iss = process.env.NEXTAUTH_URL || "http://localhost:3000";
       return token;
     },
   },

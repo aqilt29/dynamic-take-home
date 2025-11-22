@@ -81,6 +81,7 @@ export async function GET() {
       createdAt: user.createdAt,
       isNew: isNew,
       email: user.email,
+      externalServerKeyShares: wallet.externalServerKeyShares,
     });
   } catch (error) {
     console.error("Wallet operation error:", error);

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getAuthenticatedEvmClient } from "@/lib/dynamic-client";
+import { getAuthenticatedEvmClient } from "@/lib/dynamic";
 import { baseSepolia } from "viem/chains";
 import { formatEther } from "viem";
 

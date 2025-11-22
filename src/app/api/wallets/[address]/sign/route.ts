@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getAuthenticatedEvmClient } from "@/lib/dynamic-client";
+import { getAuthenticatedEvmClient } from "@/lib/dynamic";
 import { baseSepolia } from "viem/chains";
 import { parseEther } from "viem";
 
@@ -55,7 +55,8 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json(
       {
         error: "Transaction signing not yet implemented",
-        message: "Server-side transaction signing requires additional key management setup"
+        message:
+          "Server-side transaction signing requires additional key management setup",
       },
       { status: 501 }
     );
