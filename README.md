@@ -52,15 +52,26 @@ openssl rand -base64 32
    - Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
 4. Copy the **Client ID** and **Client Secret** to `.env.local`
 
-#### Dynamic API Keys
+#### Dynamic API Keys (Required)
 
 1. Go to [Dynamic Developer Dashboard](https://app.dynamic.xyz/dashboard/developer/api)
 2. Copy your **Environment ID** to `DYNAMIC_ENVIRONMENT_ID` in `.env.local`
 3. Generate or copy your **API Token** to `DYNAMIC_AUTH_TOKEN` in `.env.local`
 
+> [!IMPORTANT]
+> Dynamic API keys are **required** for the wallet functionality to work. Without them, users will not be able to create or access wallets.
+
+#### BaseScan API Key (Required for Transaction History)
+
+1. Go to [BaseScan](https://basescan.org/register) and create a free account
+2. Navigate to API-KEYs section and create a new API key
+3. Copy the **API Key** to `BASESCAN_API_KEY` in `.env.local`
+
+> [!NOTE]
+> The BaseScan API key is used to fetch transaction history on the dashboard. The app will work without it, but transaction history won't be displayed.
+
 > [!WARNING]
-> without the credentials for either service the logins for those wont work
-> but the email login will work.
+> OAuth credentials (Google/GitHub) are optional. Without them, those specific login methods won't work, but email login will still function.
 
 ### 4. Run the Development Server
 
@@ -70,6 +81,39 @@ npm run dev
 
 The server will run on the default port of 3000 so
 you may then visit [http://localhost:3000](http://localhost:3000)
+
+---
+
+## How This Demo Addresses Customer Requirements
+
+### 1. Pre-generated Wallets ✅
+
+- Wallets are automatically created when users sign up using Dynamic's WaaS API
+- No setup required - users receive a wallet instantly on first login
+- Each wallet is uniquely associated with the user's email address
+- Wallets persist across sessions and are managed by Dynamic's infrastructure
+
+**Implementation**: `GET /api/wallets` endpoint calls Dynamic's `/waas/create` API with the user's email identifier
+
+### 2. Account Abstraction ✅
+
+- Wallet card displays an informational section explaining account abstraction
+- Clear messaging: "You don't need to worry about gas fees or managing private keys"
+- Transactions are simplified and secured automatically
+
+**User Experience**: Account abstraction info is shown on `/dashboard/wallets` page
+
+### 3. Wallet Visibility ✅
+
+- **Dashboard Home**: User profile card displays wallet address with copy functionality
+- **Wallets Page**: Detailed wallet information including balance on Base Sepolia testnet
+- **Transaction History**: Table showing all transactions with status, value, and timestamps
+- Clean, responsive UI built with shadcn/ui components
+
+**Pages**:
+
+- `/dashboard` - Overview with user info and transaction history
+- `/dashboard/wallets` - Detailed wallet management
 
 ---
 
