@@ -3,12 +3,11 @@ import * as jose from "jose";
 
 /**
  * JWKS (JSON Web Key Set) endpoint
- * Standard location for public keys used to verify JWTs
- * Required by Dynamic's external authentication feature
+ * Exposes the public key for JWT signature verification
+ * Used by external services (like Dynamic) to verify JWT tokens
  */
 export async function GET() {
   try {
-    // Get the public key from environment
     const publicKeyBase64 = process.env.NEXTAUTH_JWT_PUBLIC_KEY;
 
     if (!publicKeyBase64) {
@@ -19,7 +18,9 @@ export async function GET() {
     }
 
     // Decode the base64 public key
-    const publicKeyPem = Buffer.from(publicKeyBase64, "base64").toString("utf-8");
+    const publicKeyPem = Buffer.from(publicKeyBase64, "base64").toString(
+      "utf-8"
+    );
 
     // Import the public key
     const publicKey = await jose.importSPKI(publicKeyPem, "RS256");
@@ -27,8 +28,8 @@ export async function GET() {
     // Export as JWK (JSON Web Key)
     const jwk = await jose.exportJWK(publicKey);
 
-    // Create JWKS response with standard fields
-    const jwks = {
+    // Return JWKS format
+    return NextResponse.json({
       keys: [
         {
           ...jwk,
@@ -37,14 +38,6 @@ export async function GET() {
           kid: "nextauth-rsa-key",
         },
       ],
-    };
-
-    // Return JWKS with proper headers
-    return NextResponse.json(jwks, {
-      headers: {
-        "Cache-Control": "public, max-age=3600", // Cache for 1 hour
-        "Content-Type": "application/json",
-      },
     });
   } catch (error) {
     console.error("Error generating JWKS:", error);
