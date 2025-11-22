@@ -1,9 +1,4 @@
 import { useState } from "react";
-import {
-  useDynamicContext,
-  isEthereumWallet,
-  isZeroDevConnector,
-} from "@/lib/dynamic";
 import { parseEther } from "viem";
 
 /**
@@ -19,19 +14,17 @@ export interface SendTransactionOptions {
  *
  * This hook provides functionality to send ETH without requiring
  * users to pay gas fees, leveraging ZeroDev's account abstraction infrastructure.
+ *
+ * All operations are handled server-side - no client-side Dynamic SDK needed!
  */
 export function useSendTransaction() {
-  // Get the user's primary wallet from Dynamic's context
-  const { primaryWallet } = useDynamicContext();
-  console.log("🚀 ~ useSendTransaction ~ primaryWallet:", primaryWallet);
-
   // Track loading state during transaction
   const [isLoading, setIsLoading] = useState(false);
   // Store the transaction hash after successful send
   const [txHash, setTxHash] = useState<string | null>(null);
 
   /**
-   * Sends ETH to a recipient using gasless transactions
+   * Sends ETH to a recipient using gasless transactions (server-side)
    *
    * @param options - Configuration for the send operation
    * @returns Promise<string> - The transaction hash of the successful send
@@ -54,42 +47,39 @@ export function useSendTransaction() {
       // Set loading state to show user that operation is in progress
       setIsLoading(true);
 
-      // Ensure we have a valid Ethereum wallet connected
-      if (!primaryWallet || !isEthereumWallet(primaryWallet)) {
-        throw new Error("Wallet not connected or not EVM compatible");
+      // First get the user's wallet address
+      const walletResponse = await fetch("/api/wallets");
+      if (!walletResponse.ok) {
+        throw new Error("Failed to get wallet");
       }
-
-      // Get the wallet client to interact with the blockchain
-      const walletClient = await primaryWallet.getWalletClient();
+      const walletData = await walletResponse.json();
+      const walletAddress = walletData.address;
 
       // Convert ETH amount to Wei
-      const valueInWei = parseEther(value);
+      const valueInWei = parseEther(value).toString();
 
-      // Send the transaction
-      // This creates a user operation that will be sponsored (gasless)
-      const operationHash = await walletClient.sendTransaction({
-        to: to as `0x${string}`,
-        value: valueInWei,
+      // Send transaction via server-side API
+      const response = await fetch("/api/transactions/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to,
+          value: valueInWei,
+          walletAddress,
+        }),
       });
 
-      // Get the ZeroDev connector to access account abstraction features
-      const connector = primaryWallet.connector;
-      if (!connector || !isZeroDevConnector(connector)) {
-        throw new Error("Connector is not a ZeroDev connector");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || "Transaction failed");
       }
 
-      // Get the kernel client (ZeroDev's account abstraction provider)
-      const kernelClient = connector.getAccountAbstractionProvider();
-      if (!kernelClient) throw new Error("Kernel client not found");
-
-      // Wait for the user operation to be processed and get the receipt
-      // This is different from regular transactions as it's a user operation
-      const receipt = await kernelClient.waitForUserOperationReceipt({
-        hash: operationHash,
-      });
+      const result = await response.json();
+      const transactionHash = result.transactionHash;
 
       // Store the transaction hash for UI display and return it
-      const transactionHash = receipt.receipt.transactionHash;
       setTxHash(transactionHash);
       return transactionHash;
     } catch (e: unknown) {

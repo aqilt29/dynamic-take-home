@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getAuthenticatedEvmClient } from "@/lib/dynamic";
 import { baseSepolia } from "viem/chains";
-import { formatEther } from "viem";
+import { formatEther, createPublicClient, http } from "viem";
 
 interface RouteContext {
   params: Promise<{ address: string }>;
@@ -18,12 +17,10 @@ export async function GET(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get wallet balance from blockchain
-    const evmClient = await getAuthenticatedEvmClient();
-
-    const publicClient = evmClient.createViemPublicClient({
+    // Get wallet balance from blockchain using viem
+    const publicClient = createPublicClient({
       chain: baseSepolia,
-      rpcUrl: "https://sepolia.base.org",
+      transport: http("https://sepolia.base.org"),
     });
 
     const balance = await publicClient.getBalance({

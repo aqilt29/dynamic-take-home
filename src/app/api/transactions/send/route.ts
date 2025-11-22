@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getAuthenticatedEvmClient } from "@/lib/dynamic";
-import { createZerodevClient } from "@dynamic-labs-wallet/node-evm";
+import {
+  DynamicEvmWalletClient,
+  createZerodevClient,
+} from "@dynamic-labs-wallet/node-evm";
+
+const DYNAMIC_API_BASE = "https://app.dynamic.xyz/api/v0";
 
 // POST /api/transactions/send - Send a sponsored transaction using ZeroDev
 export async function POST(request: Request) {
@@ -23,19 +27,30 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("Sending transaction:", { to, value, from: walletAddress });
+    console.log("🚀 Sending transaction:", { to, value, from: walletAddress });
 
-    // Get authenticated EVM client
-    const evmClient = await getAuthenticatedEvmClient();
-
-    // Fetch wallet details to get externalServerKeyShares
-    const DYNAMIC_API_BASE = "https://app.dynamic.xyz/api/v0";
     const environmentId = process.env.DYNAMIC_ENVIRONMENT_ID;
     const authToken = process.env.DYNAMIC_AUTH_TOKEN;
 
+    if (!environmentId || !authToken) {
+      console.error("Missing Dynamic credentials");
+      return NextResponse.json(
+        { error: "Dynamic credentials not configured" },
+        { status: 500 }
+      );
+    }
+
+    // Get authenticated EVM client
+    console.log("🔐 Creating authenticated EVM client...");
+    const evmClient = new DynamicEvmWalletClient({
+      environmentId,
+    });
+    await evmClient.authenticateApiToken(authToken);
+
+    // Fetch wallet details to get externalServerKeyShares
     const createWalletUrl = `${DYNAMIC_API_BASE}/environments/${environmentId}/waas/create`;
 
-    console.log("Fetching wallet with key shares for:", session.user.email);
+    console.log("📱 Fetching wallet with key shares for:", session.user.email);
     const walletResponse = await fetch(createWalletUrl, {
       method: "POST",
       headers: {
@@ -52,31 +67,26 @@ export async function POST(request: Request) {
 
     if (!walletResponse.ok) {
       const errorText = await walletResponse.text();
+      console.error("Failed to fetch wallet:", errorText);
       throw new Error(`Failed to fetch wallet: ${errorText}`);
     }
 
     const walletData = await walletResponse.json();
-
     const wallet = walletData.user.wallets?.[0];
-    console.log(
-      "🚀 ~ POST ~ Full wallet object:",
-      JSON.stringify(wallet, null, 2)
-    );
 
     if (!wallet) {
       throw new Error("No wallet found for user");
     }
 
+    console.log("✅ Wallet found:", wallet.publicKey);
+    console.log("🔑 Has key shares:", !!wallet.externalServerKeyShares);
+
     // Create ZeroDev client
-    console.log("Creating ZeroDev client...");
+    console.log("⚡ Creating ZeroDev client...");
     const zerodevClient = await createZerodevClient(evmClient);
 
     // Create kernel client with gas sponsorship enabled
-    console.log("Creating kernel client with sponsorship...");
-
-    // Attempt to create kernel client
-    // Note: externalServerKeyShares might not be needed if Dynamic handles signing internally
-    console.log("Creating kernel client for address:", walletAddress);
+    console.log("🔧 Creating kernel client with sponsorship...");
 
     const kernelClientOptions: any = {
       address: walletAddress as `0x${string}`,
@@ -91,10 +101,7 @@ export async function POST(request: Request) {
         wallet.externalServerKeyShares;
     } else {
       console.log(
-        "No externalServerKeyShares - attempting to create client without them"
-      );
-      console.log(
-        "Dynamic may handle signing through their MPC infrastructure"
+        "No externalServerKeyShares - Dynamic will handle signing through MPC"
       );
     }
 
@@ -103,13 +110,13 @@ export async function POST(request: Request) {
     );
 
     // Send the sponsored transaction
-    console.log("Sending sponsored transaction...");
+    console.log("💸 Sending sponsored transaction...");
     const txHash = await kernelClient.sendTransaction({
       to: to as `0x${string}`,
       value: BigInt(value),
     });
 
-    console.log("Transaction sent successfully:", txHash);
+    console.log("✅ Transaction sent successfully:", txHash);
 
     return NextResponse.json({
       success: true,

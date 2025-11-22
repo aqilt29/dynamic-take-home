@@ -25,7 +25,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt",
   },
   jwt: {
-    async encode({ token, secret }) {
+    async encode({ token }) {
       // Get private key from environment
       const privateKeyBase64 = process.env.NEXTAUTH_JWT_PRIVATE_KEY;
       if (!privateKeyBase64) {
@@ -33,7 +33,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       // Decode the base64 private key
-      const privateKeyPem = Buffer.from(privateKeyBase64, "base64").toString("utf-8");
+      const privateKeyPem = Buffer.from(privateKeyBase64, "base64").toString(
+        "utf-8"
+      );
 
       // Import the private key
       const privateKey = await jose.importPKCS8(privateKeyPem, "RS256");
@@ -47,7 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       return jwt;
     },
-    async decode({ token, secret }) {
+    async decode({ token }) {
       // Get public key from environment
       const publicKeyBase64 = process.env.NEXTAUTH_JWT_PUBLIC_KEY;
       if (!publicKeyBase64) {
@@ -55,7 +57,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       // Decode the base64 public key
-      const publicKeyPem = Buffer.from(publicKeyBase64, "base64").toString("utf-8");
+      const publicKeyPem = Buffer.from(publicKeyBase64, "base64").toString(
+        "utf-8"
+      );
 
       // Import the public key
       const publicKey = await jose.importSPKI(publicKeyPem, "RS256");
@@ -147,7 +151,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
         token.id = user.id;
