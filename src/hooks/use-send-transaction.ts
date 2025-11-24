@@ -73,7 +73,9 @@ export function useSendTransaction() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.details || errorData.error || "Transaction failed");
+        throw new Error(
+          errorData.details || errorData.error || "Transaction failed"
+        );
       }
 
       const result = await response.json();
