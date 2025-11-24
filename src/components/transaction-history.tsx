@@ -29,6 +29,7 @@ interface Transaction {
   value: string;
   timeStamp: string;
   isError: string;
+  type?: "external" | "internal";
 }
 
 interface TransactionHistoryProps {
@@ -87,7 +88,7 @@ export function TransactionHistory({ walletAddress }: TransactionHistoryProps) {
 
   const formatValue = (value: string) => {
     const eth = parseFloat(value) / 1e18;
-    return eth.toFixed(4);
+    return eth.toFixed(7);
   };
 
   const truncateHash = (hash: string) => {
@@ -163,15 +164,28 @@ export function TransactionHistory({ walletAddress }: TransactionHistoryProps) {
                   return (
                     <TableRow key={tx.hash}>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          {isOutgoing ? (
-                            <IconArrowUp className="size-4 text-red-500" />
-                          ) : (
-                            <IconArrowDown className="size-4 text-green-500" />
+                        <div className="flex justify-between gap-1">
+                          <div className="flex items-center gap-2">
+                            {isOutgoing ? (
+                              <IconArrowUp className="size-4 text-red-500" />
+                            ) : (
+                              <IconArrowDown className="size-4 text-green-500" />
+                            )}
+                            <span className="text-xs font-medium">
+                              {isOutgoing ? "Sent" : "Received"}
+                            </span>
+                          </div>
+                          {tx.type && (
+                            <span
+                              className={`inline-flex w-fit items-center rounded px-1.5 py-0.5 text-xs ${
+                                tx.type === "internal"
+                                  ? "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400"
+                                  : "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400"
+                              }`}
+                            >
+                              {tx.type === "internal" ? "Internal" : "External"}
+                            </span>
                           )}
-                          <span className="text-xs font-medium">
-                            {isOutgoing ? "Sent" : "Received"}
-                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
