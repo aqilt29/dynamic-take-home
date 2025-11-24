@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Providers from "@/lib/providers";
 
 export const metadata: Metadata = {
   title: "Dynamic Demo",
@@ -13,16 +12,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
-      <body>
-        <Providers>{children}</Providers>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
