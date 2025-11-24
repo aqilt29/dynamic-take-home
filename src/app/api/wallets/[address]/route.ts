@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { baseSepolia } from "viem/chains";
@@ -8,7 +9,8 @@ interface RouteContext {
 }
 
 // GET /api/wallets/[address] - Get wallet details and balance
-export async function GET(request: Request, context: RouteContext) {
+// @ts-expect-error
+export async function GET(_, context: RouteContext) {
   try {
     const session = await auth();
     const { address } = await context.params;

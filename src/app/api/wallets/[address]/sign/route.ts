@@ -19,7 +19,6 @@ export async function POST(request: Request, context: RouteContext) {
     // TODO: Implement transaction signing with Dynamic's key management
     // This requires fetching externalServerKeyShares from Dynamic's API
     // or using delegated signing approach
-    // For now, use /api/transactions/send for sending transactions
 
     return NextResponse.json(
       {
