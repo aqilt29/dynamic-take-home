@@ -80,15 +80,12 @@ export function SignupForm({
         setFormattedError(result.code);
       } else {
         router.push("/dashboard");
-        router.refresh();
       }
     } catch (err) {
       setFormattedError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

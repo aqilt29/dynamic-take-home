@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { TransactionType } from "viem";
 
 interface RouteContext {
   params: Promise<{ address: string }>;
@@ -26,30 +28,87 @@ export async function GET(request: Request, context: RouteContext) {
 
     // Base Sepolia Basescan API
     const API_URL = "https://api.etherscan.io/v2/api";
-    const url = `${API_URL}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=${API_KEY}&chainid=84532`;
+    const chainId = "84532"; // Base Sepolia
 
-    https: console.log("Fetching transactions for address:", address);
+    console.log("Fetching transactions for address:", address);
 
-    const response = await fetch(url);
+    // Helper function to delay execution
+    const delay = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch transactions from Basescan");
+    // Fetch external transactions first
+    const externalTxUrl = `${API_URL}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=20&sort=desc&apikey=${API_KEY}&chainid=${chainId}`;
+
+    console.log("Fetching external transactions...");
+    const externalResponse = await fetch(externalTxUrl);
+
+    if (!externalResponse.ok) {
+      throw new Error("Failed to fetch external transactions from Basescan");
     }
 
-    const data = await response.json();
-    console.log("🚀 ~ GET ~ data:", data);
+    const externalData = await externalResponse.json();
+    console.log(
+      "External transactions fetched:",
+      externalData.result?.length || 0
+    );
 
-    if (data.status === "1" && data.result) {
-      return NextResponse.json({
-        transactions: data.result,
-        count: data.result.length,
-      });
-    } else {
-      return NextResponse.json({
-        transactions: [],
-        count: 0,
-      });
+    // Wait 2 seconds before making the next API call to avoid rate limits
+    console.log("Waiting 2 seconds before fetching internal transactions...");
+    await delay(2000);
+
+    // Fetch internal transactions
+    const internalTxUrl = `${API_URL}?module=account&action=txlistinternal&address=${address}&startblock=0&endblock=99999999&page=1&offset=20&sort=desc&apikey=${API_KEY}&chainid=${chainId}`;
+
+    console.log("Fetching internal transactions...");
+    const internalResponse = await fetch(internalTxUrl);
+
+    if (!internalResponse.ok) {
+      throw new Error("Failed to fetch internal transactions from Basescan");
     }
+
+    const internalData = await internalResponse.json();
+    console.log(
+      "Internal transactions fetched:",
+      internalData.result?.length || 0
+    );
+
+    // Combine both transaction types
+    const externalTransactions: TransactionType[] =
+      externalData.status === "1" && externalData.result
+        ? externalData.result
+        : [];
+    const internalTransactions: TransactionType[] =
+      internalData.status === "1" && internalData.result
+        ? internalData.result
+        : [];
+
+    // Add a type flag to distinguish between external and internal transactions
+    const allTransactions = [
+      ...externalTransactions.map((tx) => ({
+        // @ts-ignore
+        ...tx,
+        type: "external",
+      })),
+      ...internalTransactions.map((tx) => ({
+        // @ts-ignore
+        ...tx,
+        type: "internal",
+      })),
+    ];
+
+    // Sort by timestamp (most recent first)
+    allTransactions.sort(
+      (a, b) => parseInt(b.timeStamp) - parseInt(a.timeStamp)
+    );
+
+    console.log("Total transactions combined:", allTransactions.length);
+
+    return NextResponse.json({
+      transactions: allTransactions,
+      count: allTransactions.length,
+      external: externalTransactions.length,
+      internal: internalTransactions.length,
+    });
   } catch (error) {
     console.error("Error fetching transactions:", error);
     return NextResponse.json(

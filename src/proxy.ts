@@ -10,7 +10,7 @@ export default auth((req) => {
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
   // Define protected routes that require authentication
-  const protectedRoutes = ["/dashboard", "/profile", "/settings", "/admin"];
+  const protectedRoutes = ["/dashboard", "/profile"];
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
