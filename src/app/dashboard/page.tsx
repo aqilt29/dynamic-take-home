@@ -12,9 +12,6 @@ export default async function DashboardHome() {
   if (!session?.user) redirect("/login");
 
   const user = await UserService.getByEmail(session.user.email);
-
-  console.log("🚀 ~ page.tsx:16 ~ DashboardHome ~ user:", user);
-
   if (!user) redirect("/signup");
 
   const walletWithBalance = await WalletService.listByUserIdWithBalances(
