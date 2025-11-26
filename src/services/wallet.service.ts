@@ -3,9 +3,13 @@
  * Business logic for wallet operations
  */
 
-import { blockchainClient, dynamicClient, type WalletBalance } from "@/lib/clients";
+import {
+  blockchainClient,
+  dynamicClient,
+  type WalletBalance,
+} from "@/lib/clients";
 import { getSupabaseClient } from "@/lib/supabase-client";
-import { DBWallet } from "@/types/wallet.types";
+import { DBWallet, WalletRow } from "@/types/wallet.types";
 
 export interface WalletDetails extends WalletBalance {
   userId?: string;
@@ -15,6 +19,22 @@ export interface WalletDetails extends WalletBalance {
  * WalletService - Handles wallet-related business logic
  */
 export class WalletService {
+  /**
+   * Private: Map database row to StoredUser (camelCase)
+   */
+  private static mapToDBWallet(row: WalletRow): DBWallet {
+    return {
+      userId: row.user_id,
+      walletId: row.wallet_id,
+      accountAddress: row.account_address,
+      publicKeyHex: row.public_key_hex,
+      rawPublicKey: row.raw_public_key,
+      externalServerKeyShares: row.external_server_key_shares,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
   /**
    * Get wallet balance by address
    */
@@ -37,47 +57,44 @@ export class WalletService {
     if (error?.code === "PGRST116") return null; // Not found
     if (error) throw new Error(`Failed to get wallet: ${error.message}`);
 
-    return data;
+    return this.mapToDBWallet(data);
   }
 
   /**
    * List all wallets for a user (from database)
    */
-  static async listByUserId(userId: string): Promise<DBWallet[]> {
+  static async walletByUserId(userId: string): Promise<DBWallet> {
     const supabase = getSupabaseClient();
 
     const { data, error } = await supabase
       .from("wallets")
       .select("*")
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .single();
 
     if (error) throw new Error(`Failed to list wallets: ${error.message}`);
 
-    return data || [];
+    return this.mapToDBWallet(data);
   }
 
   /**
-   * Get wallets with balances for a user
+   * Get wallet with balances for a user
    */
   static async listByUserIdWithBalances(
     userId: string
-  ): Promise<(DBWallet & { balance?: WalletBalance })[]> {
-    const wallets = await this.listByUserId(userId);
+  ): Promise<{ wallet: DBWallet; balance?: WalletBalance | null }> {
+    const wallet = await this.walletByUserId(userId);
 
-    // Enrich with balance data
-    const walletsWithBalances = await Promise.all(
-      wallets.map(async (wallet) => {
-        try {
-          const balance = await blockchainClient.getBalance(wallet.accountAddress);
-          return { ...wallet, balance };
-        } catch (error) {
-          console.error(`Failed to get balance for ${wallet.accountAddress}:`, error);
-          return wallet;
-        }
-      })
-    );
-
-    return walletsWithBalances;
+    try {
+      const balance = await blockchainClient.getBalance(wallet.accountAddress);
+      return { wallet, balance };
+    } catch (error) {
+      console.error(
+        `Failed to get balance for ${wallet.accountAddress}:`,
+        error
+      );
+      return { wallet, balance: null };
+    }
   }
 
   /**
@@ -100,8 +117,9 @@ export class WalletService {
    * Check if user has a wallet
    */
   static async userHasWallet(userId: string): Promise<boolean> {
-    const wallets = await this.listByUserId(userId);
-    return wallets.length > 0;
+    const wallets = await this.walletByUserId(userId);
+    if (wallets) return true;
+    return false;
   }
 }
 

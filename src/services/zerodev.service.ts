@@ -106,8 +106,7 @@ export class ZeroDevService {
     }
 
     // Get wallet with key shares from database
-    const wallets = await WalletService.listByUserId(user.id);
-    const wallet = wallets[0]; // Get first wallet
+    const wallet = await WalletService.walletByUserId(user.id);
 
     if (!wallet) {
       throw new Error("No wallet found for user");

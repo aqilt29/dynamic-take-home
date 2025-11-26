@@ -1,29 +1,22 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useEffect, useState } from "react";
+import { auth } from "@/auth";
+import { UserService, WalletService } from "@/services";
+
 import { UserWalletSummary } from "@/components/user-wallet-summary";
 import { TransactionHistory } from "@/components/transaction-history";
 
-export default function DashboardHome() {
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+export default async function DashboardHome() {
+  const session = await auth();
 
-  useEffect(() => {
-    // Fetch wallet address for transaction history
-    const fetchUser = async () => {
-      try {
-        const response = await fetch("/api/user");
+  if (!session?.user) redirect("/login");
 
-        if (response.ok) {
-          const data = await response.json();
-          setWalletAddress(data.address);
-        }
-      } catch (err) {
-        console.error("Failed to fetch wallet:", err);
-      }
-    };
+  const user = await UserService.getByEmail(session.user.email);
+  if (!user) redirect("/signup");
 
-    fetchUser();
-  }, []);
+  const walletWithBalance = await WalletService.listByUserIdWithBalances(
+    user.id
+  );
 
   return (
     <div className="px-4 lg:px-6">
@@ -36,10 +29,15 @@ export default function DashboardHome() {
 
       <div className="space-y-6">
         {/* User Summary Card */}
-        {/* <UserWalletSummary /> */}
-
+        <UserWalletSummary
+          user={user}
+          wallet={walletWithBalance.wallet}
+          balance={walletWithBalance.balance}
+        />
         {/* Transaction History */}
-        {/* {walletAddress && <TransactionHistory walletAddress={walletAddress} />} */}
+        <TransactionHistory
+          walletAddress={walletWithBalance.wallet.accountAddress}
+        />
       </div>
     </div>
   );

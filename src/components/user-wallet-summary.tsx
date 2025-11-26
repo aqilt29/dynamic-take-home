@@ -1,53 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { IconWallet, IconCopy, IconCheck } from "@tabler/icons-react";
+import { useState } from "react";
+import { IconWallet, IconCopy, IconCheck, IconCoin } from "@tabler/icons-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { StoredUser } from "@/types/users.types";
+import { DBWallet } from "@/types/wallet.types";
+import { WalletBalance } from "@/lib/clients";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { WalletErrorFallback } from "@/components/wallet-summary-error-boundary";
 
-interface WalletData {
-  address: string;
-  walletId: string;
-  isNew: boolean;
+interface UserWalletSummaryProps {
+  wallet: DBWallet;
+  user: StoredUser;
+  balance?: WalletBalance | null;
 }
 
-export function UserWalletSummary() {
-  const { data: session } = useSession();
-  const [wallet, setWallet] = useState<WalletData | null>(null);
-  const [loading, setLoading] = useState(true);
+// Internal component without error boundary
+function WalletSummaryContent({
+  wallet,
+  user,
+  balance = null,
+}: UserWalletSummaryProps) {
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    fetchWallet();
-  }, []);
-
-  const fetchWallet = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/wallets");
-      if (response.ok) {
-        const data = await response.json();
-        setWallet(data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch wallet:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const copyAddress = async () => {
-    if (wallet?.address) {
-      await navigator.clipboard.writeText(wallet.address);
+    if (wallet.accountAddress) {
+      await navigator.clipboard.writeText(wallet.accountAddress);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
-  };
-
-  const truncateAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
   const getInitials = (name?: string | null, email?: string | null) => {
@@ -65,39 +48,45 @@ export function UserWalletSummary() {
     return "U";
   };
 
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-center py-8">
-            <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Account Overview</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* User Info */}
-        <div className="flex items-center gap-4">
-          <Avatar className="size-16">
-            <AvatarImage src={session?.user?.image || ""} />
-            <AvatarFallback className="text-lg">
-              {getInitials(session?.user?.name, session?.user?.email)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            {session?.user?.name && (
-              <p className="text-lg font-semibold">{session.user.name}</p>
+        <div className="flex w-full items-start justify-between gap-4">
+          {/* User Info */}
+          <div className="flex items-center gap-4">
+            <Avatar className="size-16">
+              <AvatarImage src={user.image || ""} />
+              <AvatarFallback className="text-lg">
+                {getInitials(user?.name || user.email)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              {user?.name && (
+                <p className="text-lg font-semibold">{user.name}</p>
+              )}
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
+            </div>
+          </div>
+
+          {/* Wallet Balance */}
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <IconCoin className="size-4" />
+              <span>Balance</span>
+            </div>
+            {balance ? (
+              <div className="text-right">
+                <p className="text-2xl font-bold">{balance.balance}</p>
+                <p className="text-xs text-muted-foreground">{balance.chain}</p>
+              </div>
+            ) : (
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              </div>
             )}
-            <p className="text-sm text-muted-foreground">
-              {session?.user?.email}
-            </p>
           </div>
         </div>
 
@@ -110,7 +99,7 @@ export function UserWalletSummary() {
             </div>
             <div className="flex items-center gap-2">
               <code className="flex-1 rounded-md bg-muted px-3 py-2 text-sm font-mono">
-                {wallet.address}
+                {wallet.accountAddress}
               </code>
               <Button
                 size="icon"
@@ -129,5 +118,31 @@ export function UserWalletSummary() {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+// Exported component with built-in error boundary
+export function UserWalletSummary(props: UserWalletSummaryProps) {
+  const [errorResetKey, setErrorResetKey] = useState(0);
+
+  const handleReset = () => {
+    setErrorResetKey((prev) => prev + 1);
+  };
+
+  return (
+    <ErrorBoundary
+      key={errorResetKey}
+      fallback={
+        <WalletErrorFallback
+          error={new Error("Unable to load wallet information")}
+          resetError={handleReset}
+        />
+      }
+      onError={(error, errorInfo) => {
+        console.error("Wallet card error:", error, errorInfo);
+      }}
+    >
+      <WalletSummaryContent {...props} />
+    </ErrorBoundary>
   );
 }

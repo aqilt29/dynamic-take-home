@@ -14,8 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useSendTransaction } from "@/hooks/use-send-transaction";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { SendTransactionError } from "@/components/send-transaction-error";
 
-export function SendTransaction() {
+// Internal component without error boundary
+function SendTransactionContent() {
   const [recipientAddress, setRecipientAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -145,5 +148,31 @@ export function SendTransaction() {
         </Button>
       </CardContent>
     </Card>
+  );
+}
+
+// Exported component with built-in error boundary
+export function SendTransaction() {
+  const [errorResetKey, setErrorResetKey] = useState(0);
+
+  const handleReset = () => {
+    setErrorResetKey((prev) => prev + 1);
+  };
+
+  return (
+    <ErrorBoundary
+      key={errorResetKey}
+      fallback={
+        <SendTransactionError
+          error={new Error("Unable to load transaction form")}
+          resetError={handleReset}
+        />
+      }
+      onError={(error, errorInfo) => {
+        console.error("Send transaction error:", error, errorInfo);
+      }}
+    >
+      <SendTransactionContent />
+    </ErrorBoundary>
   );
 }
