@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { DBWallet } from "@/types/wallet.types";
 import { WalletBalance } from "@/lib/clients";
 import WalletQR from "./wallet-qr-code";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { WalletCardError } from "@/components/wallet-card-error";
 
 interface WalletCardProps {
   wallet: DBWallet;
@@ -14,14 +16,15 @@ interface WalletCardProps {
   isNew?: boolean;
 }
 
-export function WalletCard({ wallet, balance }: WalletCardProps) {
+// Internal component without error boundary
+function WalletCardContent({ wallet, balance }: WalletCardProps) {
   const [copied, setCopied] = useState(false);
 
   const copyAddress = async () => {
     if (wallet?.accountAddress) {
       await navigator.clipboard.writeText(wallet.accountAddress);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 1500);
     }
   };
   return (
@@ -86,5 +89,31 @@ export function WalletCard({ wallet, balance }: WalletCardProps) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// Exported component with built-in error boundary
+export function WalletCard(props: WalletCardProps) {
+  const [errorResetKey, setErrorResetKey] = useState(0);
+
+  const handleReset = () => {
+    setErrorResetKey((prev) => prev + 1);
+  };
+
+  return (
+    <ErrorBoundary
+      key={errorResetKey}
+      fallback={
+        <WalletCardError
+          error={new Error("Unable to load wallet card")}
+          resetError={handleReset}
+        />
+      }
+      onError={(error, errorInfo) => {
+        console.error("Wallet card error:", error, errorInfo);
+      }}
+    >
+      <WalletCardContent {...props} />
+    </ErrorBoundary>
   );
 }
