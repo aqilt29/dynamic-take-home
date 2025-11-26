@@ -6,7 +6,7 @@ import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import * as jose from "jose";
-import { createDynamicUser, getUserByEmail } from "./lib/users";
+import { UserService, WalletService } from "./services";
 import { createEmbeddedWallet } from "./lib/dynamic";
 import { AuthProviders } from "./types/users.types";
 
@@ -107,7 +107,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (mode === "register") {
           // Check if user already exists
-          const dbUser = await getUserByEmail(email);
+          const dbUser = await UserService.getByEmail(email);
 
           if (dbUser) {
             // Provide helpful error message based on their auth provider
@@ -126,7 +126,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const hashedPassword = await bcrypt.hash(password, 10);
 
           try {
-            const dynamicUser = await createDynamicUser(
+            const dynamicUser = await UserService.create(
               email,
               AuthProviders.CREDENTIALS,
               hashedPassword
@@ -159,7 +159,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
         } else {
           // Login mode
-          const existingUser = await getUserByEmail(email);
+          const existingUser = await UserService.getByEmail(email);
 
           if (!existingUser) {
             throw new SignInError("No account found. Please register first");
@@ -193,9 +193,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log("🚀 ~ profile:", profile);
-      // Only handle OAuth providers (Google, GitHub)
+    async signIn({ user, account }) {
       if (!account || account.provider === "credentials") {
         return true; // Credentials handled in authorize()
       }
@@ -208,9 +206,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         // Check if user exists in our database
-        const existingUser = await getUserByEmail(email);
-
-        console.log("🚀 ~ auth.ts:202 ~ existingUser:", existingUser);
+        const existingUser = await UserService.getByEmail(email);
 
         if (!existingUser) {
           // Create new user for OAuth sign-in
@@ -219,45 +215,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.log(`Creating new ${provider} user: ${email}`);
 
           // Create user without password hash (provider is set)
-          const dynamicUser = await createDynamicUser(email, provider);
+          const dynamicUser = await UserService.create(email, provider);
 
           // Create embedded wallet for new OAuth user
-          const embeddedWalletResult = await createEmbeddedWallet(
+          const embeddedWalletResult = await WalletService.createForUser(
             dynamicUser.id
           );
 
           console.log({ embeddedWalletResult });
-
-          // Update the user object with our database ID
-          user.id = dynamicUser.id;
-        } else {
-          // User exists - account linking scenario
-          const currentProvider = isAuthProvider(account.provider);
-
-          console.log(
-            `Account linking: ${email} signing in with ${currentProvider}, existing provider: ${existingUser.authProvider}`
-          );
-
-          // Case 1: OAuth -> Different OAuth (Google -> GitHub or vice versa)
-          // Allow sign-in, user can access account with either provider
-
-          // Case 2: Credentials -> OAuth
-          // Allow OAuth sign-in for credentials account (convenient for user)
-
-          // Case 3: OAuth -> Credentials
-          // This is handled in the authorize() function - will fail if no password
-
-          // Use the existing database ID
-          user.id = existingUser.id;
-
-          // Optional: Track that they've used multiple providers
-          // You could update the provider field or log this event
-          if (existingUser.authProvider !== currentProvider) {
-            console.log(
-              `⚠️ Provider mismatch: User ${email} originally signed up with ${existingUser.authProvider}, now using ${currentProvider}`
-            );
-            // Future: You could track this in a separate accounts/providers table
-          }
         }
 
         return true;

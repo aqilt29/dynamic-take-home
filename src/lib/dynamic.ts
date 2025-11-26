@@ -8,7 +8,7 @@ import {
 import { getUserWalletByUserId, saveWallet } from "./wallets";
 import { DBWallet } from "@/types/wallet.types";
 import { environmentId, authToken } from "./constants";
-import { createDynamicUser, getUserByEmail } from "./users";
+import { UserService } from "@/services";
 import { AuthProviders } from "@/types/users.types";
 
 interface ClientProps {
@@ -91,10 +91,10 @@ export const ensureDynamicUserAndWallet = async (
   authprovider: AuthProviders = AuthProviders.CREDENTIALS,
   hashedPassword: string | null = null
 ) => {
-  const existingUser = await getUserByEmail(email);
+  const existingUser = await UserService.getByEmail(email);
 
   if (!existingUser) {
-    const dynamicUser = await createDynamicUser(
+    const dynamicUser = await UserService.create(
       email,
       authprovider,
       hashedPassword
