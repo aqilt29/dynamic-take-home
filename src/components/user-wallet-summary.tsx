@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { IconWallet, IconCopy, IconCheck } from "@tabler/icons-react";
+import {
+  IconWallet,
+  IconCopy,
+  IconCheck,
+  IconCoin,
+} from "@tabler/icons-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -49,17 +54,43 @@ export function UserWalletSummary({
         <CardTitle>Account Overview</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* User Info */}
-        <div className="flex items-center gap-4">
-          <Avatar className="size-16">
-            <AvatarImage src={user.image || ""} />
-            <AvatarFallback className="text-lg">
-              {getInitials(user?.name || user.email)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            {user?.name && <p className="text-lg font-semibold">{user.name}</p>}
-            <p className="text-sm text-muted-foreground">{user?.email}</p>
+        <div className="flex w-full items-start justify-between gap-4">
+          {/* User Info */}
+          <div className="flex items-center gap-4">
+            <Avatar className="size-16">
+              <AvatarImage src={user.image || ""} />
+              <AvatarFallback className="text-lg">
+                {getInitials(user?.name || user.email)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              {user?.name && (
+                <p className="text-lg font-semibold">{user.name}</p>
+              )}
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
+            </div>
+          </div>
+
+          {/* Wallet Balance */}
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <IconCoin className="size-4" />
+              <span>Balance</span>
+            </div>
+            {balance ? (
+              <div className="text-right">
+                <p className="text-2xl font-bold">
+                  {balance.balance}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {balance.chain}
+                </p>
+              </div>
+            ) : (
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              </div>
+            )}
           </div>
         </div>
 
