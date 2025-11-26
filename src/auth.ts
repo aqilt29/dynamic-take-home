@@ -6,13 +6,9 @@ import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import * as jose from "jose";
-import { createDynamicUser, getUserByEmail } from "./lib/users";
-import {
-  createEmbeddedWallet,
-  ensureDynamicUserAndWallet,
-} from "./lib/dynamic";
+import { UserService, WalletService } from "./services";
+import { createEmbeddedWallet } from "./lib/dynamic";
 import { AuthProviders } from "./types/users.types";
-import { withCreationLock } from "./lib/auth-lock";
 
 // custom error handling class for more information
 class SignInError extends CredentialsSignin {
@@ -23,8 +19,17 @@ class SignInError extends CredentialsSignin {
 }
 
 /** Type guard: ensure provider is one of our enum values */
-function isAuthProvider(p: unknown): p is AuthProviders {
-  return Object.values(AuthProviders).includes(p as AuthProviders);
+function isAuthProvider(providerId: string): AuthProviders {
+  switch (providerId.toLowerCase()) {
+    case "google":
+      return AuthProviders.GOOGLE;
+    case "github":
+      return AuthProviders.GITHUB;
+    case "credentials":
+      return AuthProviders.CREDENTIALS;
+    default:
+      throw new SignInError(`Unknown provider: ${providerId}`);
+  }
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -102,9 +107,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (mode === "register") {
           // Check if user already exists
-          const dbUser = await getUserByEmail(email);
+          const dbUser = await UserService.getByEmail(email);
 
           if (dbUser) {
+            // Provide helpful error message based on their auth provider
+            if (
+              dbUser.authProvider === AuthProviders.GOOGLE ||
+              dbUser.authProvider === AuthProviders.GITHUB
+            ) {
+              throw new SignInError(
+                `Account exists. Please sign in with ${dbUser.authProvider}`
+              );
+            }
             throw new SignInError("User already exists");
           }
 
@@ -112,7 +126,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const hashedPassword = await bcrypt.hash(password, 10);
 
           try {
-            const dynamicUser = await createDynamicUser(
+            const dynamicUser = await UserService.create(
               email,
               AuthProviders.CREDENTIALS,
               hashedPassword
@@ -145,14 +159,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
         } else {
           // Login mode
-          const existingUser = await getUserByEmail(email);
+          const existingUser = await UserService.getByEmail(email);
 
           if (!existingUser) {
-            throw new SignInError("Invalid db user lookup");
+            throw new SignInError("No account found. Please register first");
           }
 
           if (!existingUser.hashedPassword) {
-            throw new SignInError("Invalid db user pw lookup");
+            // User signed up with OAuth, tell them to use that provider
+            throw new SignInError(
+              `Please sign in with ${existingUser.authProvider}`
+            );
           }
 
           const isValidPassword = await bcrypt.compare(
@@ -161,7 +178,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
 
           if (!isValidPassword) {
-            throw new SignInError("Invalid credentials");
+            throw new SignInError("Invalid password");
           }
 
           const safeName = existingUser.name ?? email.split("@")[0] ?? "User";
@@ -176,8 +193,46 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    // async signIn({ user, account }) {},
-    async session({ session, token }) {
+    async signIn({ user, account }) {
+      if (!account || account.provider === "credentials") {
+        return true; // Credentials handled in authorize()
+      }
+
+      try {
+        const email = user.email;
+        if (!email) {
+          console.error("No email provided by OAuth provider");
+          return false;
+        }
+
+        // Check if user exists in our database
+        const existingUser = await UserService.getByEmail(email);
+
+        if (!existingUser) {
+          // Create new user for OAuth sign-in
+          const provider = isAuthProvider(account.provider);
+
+          console.log(`Creating new ${provider} user: ${email}`);
+
+          // Create user without password hash (provider is set)
+          const dynamicUser = await UserService.create(email, provider);
+
+          // Create embedded wallet for new OAuth user
+          const embeddedWalletResult = await WalletService.createForUser(
+            dynamicUser.id
+          );
+
+          console.log({ embeddedWalletResult });
+        }
+
+        return true;
+      } catch (error) {
+        new SignInError(`Error in signIn callback:, ${error}`);
+        return false;
+      }
+    },
+
+    async session({ session, token, ...args }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;
         // Ensure image has a fallback value
@@ -189,11 +244,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-    async jwt({ token, user }) {
+
+    async jwt({ token, user, account }) {
       if (user) {
         token.sub = user.id;
         token.id = user.id;
         token.email = user.email;
+      }
+      if (account) {
+        token.provider = account.provider;
       }
       // Add issuer for Dynamic external auth
       token.iss = process.env.NEXTAUTH_URL || "http://localhost:3000";

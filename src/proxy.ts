@@ -1,40 +1,32 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
+const AUTH_ROUTES = new Set(["/login", "/signup"]);
+const PROTECTED_ROUTES = new Set(["/dashboard"]);
+
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const { pathname } = req.nextUrl;
 
-  // Define auth routes (login/register pages)
-  const authRoutes = ["/login", "/register"];
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+  // Handle root path
+  if (pathname === "/") {
+    const destination = isLoggedIn ? "/dashboard" : "/login";
+    return NextResponse.redirect(new URL(destination, req.url));
+  }
 
-  // Define protected routes that require authentication
-  const protectedRoutes = ["/dashboard", "/profile"];
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  // Redirect logged-in users away from auth pages
+  if (isLoggedIn && AUTH_ROUTES.has(pathname)) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
 
-  // Redirect to login if trying to access protected route without auth
-  if (isProtectedRoute && !isLoggedIn) {
+  // Protect routes that require authentication
+  if (
+    !isLoggedIn &&
+    Array.from(PROTECTED_ROUTES).some((route) => pathname.startsWith(route))
+  ) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
-  }
-
-  // Redirect to dashboard if already logged in and trying to access auth pages
-  if (isAuthRoute && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
-
-  // Optionally redirect root to dashboard for logged-in users
-  if (pathname === "/" && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
-
-  // Send the user if they are not logged in from root to login anyways
-  if (pathname === "/" && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   return NextResponse.next();

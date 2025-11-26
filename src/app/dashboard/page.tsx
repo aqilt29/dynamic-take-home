@@ -7,23 +7,23 @@ import { TransactionHistory } from "@/components/transaction-history";
 export default function DashboardHome() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
-  // useEffect(() => {
-  //   // Fetch wallet address for transaction history
-  //   const fetchUser = async () => {
-  //     try {
-  //       const response = await fetch("/api/user");
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         console.log("🚀 ~ fetchUser ~ data:", data);
-  //         setWalletAddress(data.address);
-  //       }
-  //     } catch (err) {
-  //       console.error("Failed to fetch wallet:", err);
-  //     }
-  //   };
+  useEffect(() => {
+    // Fetch wallet address for transaction history
+    const fetchUser = async () => {
+      try {
+        const response = await fetch("/api/user");
 
-  //   fetchUser();
-  // }, []);
+        if (response.ok) {
+          const data = await response.json();
+          setWalletAddress(data.address);
+        }
+      } catch (err) {
+        console.error("Failed to fetch wallet:", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   return (
     <div className="px-4 lg:px-6">

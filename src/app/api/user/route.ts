@@ -1,40 +1,26 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { getUserByEmail } from "@/lib/users";
+/**
+ * GET /api/user
+ * Returns the current authenticated user's information
+ */
 
-const environmentId = process.env.DYNAMIC_ENVIRONMENT_ID || "";
-const authToken = process.env.DYNAMIC_AUTH_TOKEN || "";
+import {
+  withAuth,
+  apiSuccess,
+  CommonErrors,
+  validateDynamicConfig,
+} from "@/lib/api";
+import { UserService } from "@/services";
 
-export const GET = async () => {
-  const session = await auth();
+export const GET = withAuth(async (req, { session }) => {
+  // Validate environment configuration
+  validateDynamicConfig();
 
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Fetch user from database
+  const user = await UserService.getByEmail(session.user.email);
+
+  if (!user) {
+    return CommonErrors.notFound("User not found");
   }
 
-  if (!environmentId || !authToken) {
-    console.error("Missing Dynamic credentials");
-    return NextResponse.json(
-      { error: "Dynamic credentials not configured" },
-      { status: 500 }
-    );
-  }
-
-  const userEmail = session.user.email;
-
-  try {
-    const existingUser = await getUserByEmail(userEmail);
-    console.log("🚀 ~ GET ~ existingUser:", existingUser);
-
-    return NextResponse.json(existingUser);
-  } catch (error) {
-    console.error("User lookup failed:", error);
-    return NextResponse.json(
-      {
-        error: `Failed to get or create user by email, ${userEmail}`,
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
-  }
-};
+  return apiSuccess(user);
+});
