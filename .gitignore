@@ -43,4 +43,3 @@ next-env.d.ts
 source.txt
 # RSA Keys for JWT signing
 keys/
-src/lib/api/README.md
