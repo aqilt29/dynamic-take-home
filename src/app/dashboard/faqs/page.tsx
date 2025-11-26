@@ -81,8 +81,16 @@ export default async function FAQs() {
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3">
                   <p>
-                    When a user signs up, Dynamic&apos;s Wallet-as-a-Service
-                    (WaaS) API automatically:
+                    When a user signs up,{" "}
+                    <a
+                      href="https://docs.dynamic.xyz/wallets/embedded-wallets"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline hover:no-underline"
+                    >
+                      Dynamic&apos;s Wallet-as-a-Service (WaaS)
+                    </a>{" "}
+                    API automatically:
                   </p>
                   <ol className="ml-4 list-decimal space-y-2 text-sm">
                     <li>
@@ -114,9 +122,17 @@ export default async function FAQs() {
                     private keys, or any cryptographic material.
                   </p>
                   <p>
-                    Dynamic uses threshold signature schemes (TSS) where the
-                    private key is split into multiple encrypted shares stored
-                    across different secure servers. This means:
+                    Dynamic uses{" "}
+                    <a
+                      href="https://www.dynamic.xyz/docs/wallets/embedded-wallets/mpc/overview#secured-by-tss-mpc"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline hover:no-underline"
+                    >
+                      threshold signature schemes (TSS)
+                    </a>{" "}
+                    where the private key is split into multiple encrypted
+                    shares stored across different secure servers. This means:
                   </p>
                   <ul className="ml-4 list-disc space-y-1 text-sm">
                     <li>
@@ -132,26 +148,6 @@ export default async function FAQs() {
                       phrases = lost funds
                     </li>
                   </ul>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="wallet-ownership">
-                <AccordionTrigger>
-                  Who owns the wallet? Can users export it?
-                </AccordionTrigger>
-                <AccordionContent className="space-y-3">
-                  <p>
-                    The user owns the wallet. While Dynamic manages the secure
-                    infrastructure, the wallet is uniquely associated with the
-                    user&apos;s account and only they can authorize
-                    transactions.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Dynamic&apos;s embedded wallets support exporting for users
-                    who want full custody, but this demo focuses on the
-                    simplified experience where users don&apos;t need to
-                    understand these technical details.
-                  </p>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -177,9 +173,18 @@ export default async function FAQs() {
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3">
                   <p>
-                    Account abstraction (specifically ERC-4337) transforms
-                    Ethereum wallets from simple key-pair accounts into
-                    programmable smart contract wallets with advanced features.
+                    Account abstraction (specifically{" "}
+                    <a
+                      href="https://eips.ethereum.org/EIPS/eip-4337"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline hover:no-underline"
+                    >
+                      ERC-4337
+                    </a>
+                    ) transforms Ethereum wallets from simple key-pair accounts
+                    into programmable smart contract wallets with advanced
+                    features.
                   </p>
                   <p className="font-semibold">Traditional Wallets:</p>
                   <ul className="ml-4 list-disc space-y-1 text-sm">
@@ -315,9 +320,17 @@ export default async function FAQs() {
                     </div>
 
                     <p className="text-sm">
-                      In this demo, we use ZeroDev&apos;s paymaster to sponsor
-                      all transaction fees. Your application pays ZeroDev a
-                      monthly fee, and users get a completely gasless
+                      In this demo, we use{" "}
+                      <a
+                        href="https://docs.zerodev.app/smart-wallet/sponsoring-gas"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline hover:no-underline"
+                      >
+                        ZeroDev&apos;s paymaster
+                      </a>{" "}
+                      to sponsor all transaction fees. Your application pays
+                      ZeroDev a monthly fee, and users get a completely gasless
                       experience.
                     </p>
                   </div>
@@ -411,8 +424,16 @@ export default async function FAQs() {
                 </AccordionTrigger>
                 <AccordionContent className="space-y-3">
                   <p>
-                    ZeroDev provides granular controls called &quot;Gas
-                    Policies&quot; to manage costs:
+                    ZeroDev provides granular controls called{" "}
+                    <a
+                      href="https://docs.zerodev.app/meta-infra/gas-policies"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline hover:no-underline"
+                    >
+                      &quot;Gas Policies&quot;
+                    </a>{" "}
+                    to manage costs:
                   </p>
                   <ul className="ml-4 list-disc space-y-2 text-sm">
                     <li>
