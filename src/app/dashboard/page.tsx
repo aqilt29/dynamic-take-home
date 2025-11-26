@@ -29,8 +29,11 @@ export default async function DashboardHome() {
 
       <div className="space-y-6">
         {/* User Summary Card */}
-        <UserWalletSummary {...walletWithBalance} user={user} />
-
+        <UserWalletSummary
+          user={user}
+          wallet={walletWithBalance.wallet}
+          balance={walletWithBalance.balance}
+        />
         {/* Transaction History */}
         <TransactionHistory
           walletAddress={walletWithBalance.wallet.accountAddress}

@@ -1,28 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import {
-  IconWallet,
-  IconCopy,
-  IconCheck,
-  IconCoin,
-} from "@tabler/icons-react";
+import { IconWallet, IconCopy, IconCheck, IconCoin } from "@tabler/icons-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { StoredUser } from "@/types/users.types";
 import { DBWallet } from "@/types/wallet.types";
 import { WalletBalance } from "@/lib/clients";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { WalletErrorFallback } from "@/components/wallet-summary-error-boundary";
 
-export function UserWalletSummary({
-  wallet,
-  user,
-  balance = null,
-}: {
+interface UserWalletSummaryProps {
   wallet: DBWallet;
   user: StoredUser;
   balance?: WalletBalance | null;
-}) {
+}
+
+// Internal component without error boundary
+function WalletSummaryContent({
+  wallet,
+  user,
+  balance = null,
+}: UserWalletSummaryProps) {
   const [copied, setCopied] = useState(false);
 
   const copyAddress = async () => {
@@ -79,12 +79,8 @@ export function UserWalletSummary({
             </div>
             {balance ? (
               <div className="text-right">
-                <p className="text-2xl font-bold">
-                  {balance.balance}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {balance.chain}
-                </p>
+                <p className="text-2xl font-bold">{balance.balance}</p>
+                <p className="text-xs text-muted-foreground">{balance.chain}</p>
               </div>
             ) : (
               <div className="text-right">
@@ -122,5 +118,31 @@ export function UserWalletSummary({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+// Exported component with built-in error boundary
+export function UserWalletSummary(props: UserWalletSummaryProps) {
+  const [errorResetKey, setErrorResetKey] = useState(0);
+
+  const handleReset = () => {
+    setErrorResetKey((prev) => prev + 1);
+  };
+
+  return (
+    <ErrorBoundary
+      key={errorResetKey}
+      fallback={
+        <WalletErrorFallback
+          error={new Error("Unable to load wallet information")}
+          resetError={handleReset}
+        />
+      }
+      onError={(error, errorInfo) => {
+        console.error("Wallet card error:", error, errorInfo);
+      }}
+    >
+      <WalletSummaryContent {...props} />
+    </ErrorBoundary>
   );
 }
