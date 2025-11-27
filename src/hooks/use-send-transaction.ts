@@ -204,10 +204,11 @@ export function useSendTransaction() {
           );
         }
 
-        const result = await response.json();
-        const transactionHash = result.transactionHash;
+        const {
+          data: { message, success, transactionHash },
+        } = await response.json();
 
-        if (!transactionHash) {
+        if (!success) {
           throw new Error("No transaction hash returned from server");
         }
 
@@ -227,12 +228,6 @@ export function useSendTransaction() {
 
         return transactionHash;
       } catch (error) {
-        // Check if error is due to abort
-        if (error instanceof Error && error.name === "AbortError") {
-          console.log("Transaction cancelled");
-          throw new Error("Transaction was cancelled");
-        }
-
         const errorMessage =
           error instanceof Error ? error.message : "Transaction failed";
 
