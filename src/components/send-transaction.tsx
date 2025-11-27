@@ -28,6 +28,11 @@ function SendTransactionContent() {
 
   const { sendTransaction, isPending } = useSendTransaction();
 
+  console.log(
+    "🚀 ~ send-transaction.tsx:31 ~ SendTransactionContent ~ isPending:",
+    isPending
+  );
+
   const handleSendTransaction = async () => {
     try {
       setError(null);
@@ -44,11 +49,6 @@ function SendTransactionContent() {
         setError("Invalid amount");
         return;
       }
-
-      console.log("Sending transaction:", {
-        to: recipientAddress,
-        value: amount,
-      });
 
       // Send transaction using the hook
       const txHash = await sendTransaction({
@@ -136,7 +136,7 @@ function SendTransactionContent() {
         {/* Send Button */}
         <Button
           onClick={handleSendTransaction}
-          disabled={isPending || !recipientAddress || !amount}
+          disabled={isPending}
           className="w-full"
         >
           {isPending ? (

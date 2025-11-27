@@ -4,7 +4,7 @@
  * Wrapper for Basescan API with automatic rate limiting
  */
 
-import { EXTERNAL_API_CONFIG, RATE_LIMIT_CONFIG } from "@/lib/api/config";
+import { EXTERNAL_API_CONFIG, RATE_LIMIT_CONFIG } from "@/lib/config";
 
 export interface BasescanTransaction {
   blockNumber: string;

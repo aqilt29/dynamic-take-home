@@ -5,7 +5,7 @@
  */
 
 import { createZerodevClient } from "@dynamic-labs-wallet/node-evm";
-import { DYNAMIC_CONFIG, ZERODEV_CONFIG } from "@/lib/api/config";
+import { DYNAMIC_CONFIG, ZERODEV_CONFIG } from "@/lib/config";
 import type { ZeroDevKernelOptions } from "@/types/zerodev.types";
 import { UserService } from "./user.service";
 import { WalletService } from "./wallet.service";

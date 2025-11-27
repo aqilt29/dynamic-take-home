@@ -9,6 +9,7 @@ import * as jose from "jose";
 import { UserService, WalletService } from "./services";
 import { createEmbeddedWallet } from "./lib/dynamic";
 import { AuthProviders } from "./types/users.types";
+import { NEXTAUTH_CONFIG, validateNextAuthConfig } from "@/lib/config";
 
 // custom error handling class for more information
 class SignInError extends CredentialsSignin {
@@ -38,11 +39,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   jwt: {
     async encode({ token }) {
-      // Get private key from environment
-      const privateKeyBase64 = process.env.NEXTAUTH_JWT_PRIVATE_KEY;
-      if (!privateKeyBase64) {
-        throw new Error("NEXTAUTH_JWT_PRIVATE_KEY is not configured");
-      }
+      // Get private key from configuration
+      validateNextAuthConfig();
+      const privateKeyBase64 = NEXTAUTH_CONFIG.jwtPrivateKey;
 
       // Decode the base64 private key
       const privateKeyPem = Buffer.from(privateKeyBase64, "base64").toString(
@@ -62,11 +61,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return jwt;
     },
     async decode({ token }) {
-      // Get public key from environment
-      const publicKeyBase64 = process.env.NEXTAUTH_JWT_PUBLIC_KEY;
-      if (!publicKeyBase64) {
-        throw new Error("NEXTAUTH_JWT_PUBLIC_KEY is not configured");
-      }
+      // Get public key from configuration
+      validateNextAuthConfig();
+      const publicKeyBase64 = NEXTAUTH_CONFIG.jwtPublicKey;
 
       // Decode the base64 public key
       const publicKeyPem = Buffer.from(publicKeyBase64, "base64").toString(
@@ -255,7 +252,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.provider = account.provider;
       }
       // Add issuer for Dynamic external auth
-      token.iss = process.env.NEXTAUTH_URL || "http://localhost:3000";
+      token.iss = NEXTAUTH_CONFIG.url;
       return token;
     },
   },

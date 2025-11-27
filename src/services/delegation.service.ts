@@ -5,7 +5,7 @@
  */
 
 import crypto from "crypto";
-import { DYNAMIC_CONFIG } from "@/lib/api/config";
+import { DYNAMIC_CONFIG } from "@/lib/config";
 import type {
   DelegationCreatedData,
   DelegationRevokedData,

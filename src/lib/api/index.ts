@@ -3,8 +3,8 @@
  * Central export point for all API utilities
  */
 
-// Configuration
-export * from "./config";
+// Configuration (from centralized config)
+export * from "@/lib/config";
 
 // Response utilities
 export * from "./responses";

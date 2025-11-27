@@ -4,7 +4,7 @@ import { DynamicEvmWalletClient } from "@dynamic-labs-wallet/node-evm";
 
 import { saveWallet } from "./wallets";
 import { DBWallet } from "@/types/wallet.types";
-import { environmentId, authToken } from "./constants";
+import { DYNAMIC_CONFIG } from "@/lib/config";
 
 interface ClientProps {
   authToken: string;
@@ -33,8 +33,8 @@ export const createEmbeddedWallet = async (
   console.error(`❌ Wallet not found: ${userId}`);
 
   const dynamicEvmClient = await getAuthenticatedEvmClient({
-    environmentId,
-    authToken,
+    environmentId: DYNAMIC_CONFIG.environmentId,
+    authToken: DYNAMIC_CONFIG.authToken,
   });
 
   const baseWallet = await dynamicEvmClient.createWalletAccount({

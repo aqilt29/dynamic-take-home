@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { DYNAMIC_CONFIG } from "@/lib/config";
 
 /**
  * Dynamic Delegated Access Webhook Handler
@@ -111,7 +112,7 @@ async function handleDelegationCreated(event: WebhookEvent) {
   });
 
   // Get private key for decryption
-  const privateKeyPem = process.env.DELEGATION_PRIVATE_KEY;
+  const privateKeyPem = DYNAMIC_CONFIG.delegationPrivateKey;
   if (!privateKeyPem) {
     throw new Error("DELEGATION_PRIVATE_KEY not configured");
   }
@@ -211,7 +212,7 @@ export async function POST(request: Request) {
 
     // Verify webhook signature
     const signature = request.headers.get("x-dynamic-signature-256");
-    const webhookSecret = process.env.DYNAMIC_WEBHOOK_SECRET;
+    const webhookSecret = DYNAMIC_CONFIG.webhookSecret;
 
     if (!webhookSecret) {
       console.error("DYNAMIC_WEBHOOK_SECRET not configured");
