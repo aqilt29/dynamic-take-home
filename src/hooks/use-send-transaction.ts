@@ -156,11 +156,6 @@ export function useSendTransaction() {
   /**
    * Sends ETH to a recipient using gasless transactions
    *
-   * Protected against:
-   * - Race conditions
-   * - Invalid addresses
-   * - Invalid amounts
-   * - Component unmount during execution
    */
   const sendTransaction = useCallback(
     async (options: SendTransactionOptions): Promise<string> => {
