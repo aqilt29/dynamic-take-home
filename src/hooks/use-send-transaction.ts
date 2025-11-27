@@ -192,7 +192,7 @@ export function useSendTransaction() {
         }
 
         const {
-          data: { message, success, transactionHash },
+          data: { success, transactionHash },
         } = await response.json();
 
         if (!success) {

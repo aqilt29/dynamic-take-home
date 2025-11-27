@@ -28,11 +28,6 @@ function SendTransactionContent() {
 
   const { sendTransaction, isPending } = useSendTransaction();
 
-  console.log(
-    "🚀 ~ send-transaction.tsx:31 ~ SendTransactionContent ~ isPending:",
-    isPending
-  );
-
   const handleSendTransaction = async () => {
     try {
       setError(null);
