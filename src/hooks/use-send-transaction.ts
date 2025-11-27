@@ -11,11 +11,6 @@ export interface SendTransactionOptions {
 
 /**
  * Custom hook for sending ETH using ZeroDev gasless transactions
- *
- * This hook provides functionality to send ETH without requiring
- * users to pay gas fees, leveraging ZeroDev's account abstraction infrastructure.
- *
- * All operations are handled server-side - no client-side Dynamic SDK needed!
  */
 export function useSendTransaction() {
   // Track loading state during transaction

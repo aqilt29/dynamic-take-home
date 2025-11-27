@@ -30,7 +30,7 @@ export interface DBWallet {
   publicKeyHex: string;
 
   rawPublicKey: RawPublicKeyJSON; // JSONB
-  externalServerKeyShares: ExternalServerKeyShareJSON[]; // JSONB array
+  externalServerKeyShares: ExternalServerKeyShareJSON; // JSONB array
 
   createdAt?: string;
   updatedAt?: string;
@@ -54,7 +54,7 @@ export interface WalletRow {
   account_address: string;
   public_key_hex: string;
   raw_public_key: RawPublicKeyJSON; // JSONB
-  external_server_key_shares: ExternalServerKeyShareJSON[]; // JSONB array
+  external_server_key_shares: ExternalServerKeyShareJSON; // JSONB array
   created_at: string; // ISO timestamp
   updated_at: string; // ISO timestamp
 }
@@ -66,7 +66,7 @@ export interface WalletInsertDTO {
   account_address: string;
   public_key_hex: string;
   raw_public_key: RawPublicKeyJSON; // JSONB
-  external_server_key_shares: ExternalServerKeyShareJSON[]; // JSONB array
+  external_server_key_shares: ExternalServerKeyShareJSON; // JSONB array
 }
 
 // -----------------------------
