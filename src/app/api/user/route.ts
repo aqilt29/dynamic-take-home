@@ -11,7 +11,7 @@ import {
 } from "@/lib/api";
 import { UserService } from "@/services";
 
-export const GET = withAuth(async (req, { session }) => {
+export const GET = withAuth(async (_, { session }) => {
   // Validate environment configuration
   validateDynamicConfig();
 
