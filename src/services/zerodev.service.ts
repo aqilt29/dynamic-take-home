@@ -1,17 +1,16 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * ZeroDev Service
  * Business logic for ZeroDev operations
  */
 
-import {
-  createZerodevClient,
-  createDelegatedEvmWalletClient,
-} from "@dynamic-labs-wallet/node-evm";
+import { createZerodevClient } from "@dynamic-labs-wallet/node-evm";
 import { DYNAMIC_CONFIG, ZERODEV_CONFIG } from "@/lib/api/config";
-import { dynamicClient } from "@/lib/clients";
 import type { ZeroDevKernelOptions } from "@/types/zerodev.types";
 import { UserService } from "./user.service";
 import { WalletService } from "./wallet.service";
+import { ExternalServerKeyShareJSON } from "@/types/wallet.types";
+import { getAuthenticatedEvmClient } from "@/lib/dynamic";
 
 export interface SendTransactionParams {
   to: string;
@@ -44,49 +43,25 @@ export class ZeroDevService {
   }
 
   /**
-   * Create delegated EVM wallet client
-   */
-  createDelegatedClient() {
-    return createDelegatedEvmWalletClient({
-      environmentId: this.environmentId,
-      apiKey: this.authToken,
-    });
-  }
-
-  /**
-   * Create ZeroDev client for sponsorship
-   */
-  async createZerodevClient(delegatedClient: any) {
-    return await createZerodevClient(delegatedClient);
-  }
-
-  /**
    * Create kernel client with sponsorship enabled
    */
   async createKernelClient(
     walletAddress: string,
-    walletId: string,
-    externalServerKeyShares?: any
+    externalServerKeyShares: ExternalServerKeyShareJSON
   ) {
-    const delegatedClient = this.createDelegatedClient();
-    const zerodevClient = await this.createZerodevClient(delegatedClient);
+    const authenticatedEvmClient = await getAuthenticatedEvmClient({
+      authToken: this.authToken,
+      environmentId: this.environmentId,
+    });
+    const zerodevClient = await createZerodevClient(authenticatedEvmClient);
 
     const kernelOptions: ZeroDevKernelOptions = {
-      address: walletAddress as `0x${string}`,
-      networkId: ZERODEV_CONFIG.defaultNetworkId,
       withSponsorship: ZERODEV_CONFIG.withSponsorship,
-      delegated: {
-        delegatedClient,
-        walletId,
-        walletApiKey: "",
-        keyShare: "",
-      },
+      networkId: ZERODEV_CONFIG.defaultNetworkId,
+      address: walletAddress as `0x${string}`,
+      // @ts-expect-error
+      externalServerKeyShares: externalServerKeyShares,
     };
-
-    // Add external server key shares if available
-    if (externalServerKeyShares) {
-      kernelOptions.externalServerKeyShares = externalServerKeyShares;
-    }
 
     return await zerodevClient.createKernelClientForAddress(kernelOptions);
   }
@@ -118,7 +93,6 @@ export class ZeroDevService {
     // Create kernel client with sponsorship
     const kernelClient = await this.createKernelClient(
       walletAddress,
-      wallet.walletId,
       wallet.externalServerKeyShares
     );
 

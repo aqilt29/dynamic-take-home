@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { IconSend, IconCheck, IconAlertCircle } from "@tabler/icons-react";
 import {
   Card,
@@ -19,6 +20,7 @@ import { SendTransactionError } from "@/components/send-transaction-error";
 
 // Internal component without error boundary
 function SendTransactionContent() {
+  const router = useRouter();
   const [recipientAddress, setRecipientAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +59,9 @@ function SendTransactionContent() {
       setSuccess(`Transaction sent! Hash: ${txHash}`);
       setRecipientAddress("");
       setAmount("");
+
+      // Refresh server data to update wallet balance
+      router.refresh();
     } catch (err) {
       console.error("Transaction error:", err);
       setError(
