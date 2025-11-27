@@ -32,14 +32,6 @@ interface TransactionState {
 
 /**
  * Enhanced custom hook for sending ETH using ZeroDev gasless transactions
- *
- * Features:
- * - Race condition protection
- * - Memory leak prevention
- * - Enhanced address validation
- * - Better error handling
- * - Wallet address caching
- * - Request cancellation
  */
 export function useSendTransaction() {
   const [state, setState] = useState<TransactionState>({
