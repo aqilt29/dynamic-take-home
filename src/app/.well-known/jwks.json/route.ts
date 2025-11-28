@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import * as jose from "jose";
+import { NEXTAUTH_CONFIG, validateNextAuthConfig } from "@/lib/config";
 
 /**
  * JWKS (JSON Web Key Set) endpoint
@@ -8,14 +9,8 @@ import * as jose from "jose";
  */
 export async function GET() {
   try {
-    const publicKeyBase64 = process.env.NEXTAUTH_JWT_PUBLIC_KEY;
-
-    if (!publicKeyBase64) {
-      return NextResponse.json(
-        { error: "Public key not configured" },
-        { status: 500 }
-      );
-    }
+    validateNextAuthConfig();
+    const publicKeyBase64 = NEXTAUTH_CONFIG.jwtPublicKey;
 
     // Decode the base64 public key
     const publicKeyPem = Buffer.from(publicKeyBase64, "base64").toString(

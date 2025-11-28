@@ -49,7 +49,9 @@ export class TransactionService {
   /**
    * Get transaction by hash
    */
-  async getTransactionByHash(hash: string): Promise<BasescanTransaction | null> {
+  async getTransactionByHash(
+    hash: string
+  ): Promise<BasescanTransaction | null> {
     return await basescanClient.getTransactionByHash(hash);
   }
 
@@ -70,8 +72,3 @@ export class TransactionService {
     }));
   }
 }
-
-/**
- * Singleton instance
- */
-export const transactionService = new TransactionService();

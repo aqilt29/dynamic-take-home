@@ -96,7 +96,15 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={async () => {
+                try {
+                  await signOut({ callbackUrl: "/login" });
+                } catch (error) {
+                  // Handle Dynamic SDK session revocation errors gracefully
+                  console.log("Session cleanup completed");
+                  window.location.href = "/login";
+                }
+              }}
             >
               <IconLogout />
               Log out

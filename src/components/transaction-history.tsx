@@ -53,16 +53,16 @@ export function TransactionHistory({ walletAddress }: TransactionHistoryProps) {
       setError(null);
 
       // Call our server-side API route to keep API key secure
-      const response = await fetch(`/api/transactions/${walletAddress}`);
+      const response = await fetch("/api/transactions/history");
 
       if (!response.ok) {
         throw new Error("Failed to fetch transactions");
       }
 
-      const data = await response.json();
+      const { data: transactions } = await response.json();
 
-      if (data.transactions) {
-        setTransactions(data.transactions);
+      if (transactions) {
+        setTransactions(transactions);
       } else {
         setTransactions([]);
       }

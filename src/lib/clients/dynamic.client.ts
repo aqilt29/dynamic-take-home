@@ -3,7 +3,7 @@
  * Wrapper for Dynamic Labs API and SDK
  */
 
-import { DYNAMIC_CONFIG } from "@/lib/api/config";
+import { DYNAMIC_CONFIG } from "@/lib/config";
 import { DynamicEvmWalletClient } from "@dynamic-labs-wallet/node-evm";
 import { saveWallet } from "@/lib/wallets";
 import type {

@@ -1,14 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+import { SUPABASE_CONFIG, validateSupabaseConfig } from "@/lib/config";
 
 export const getSupabaseClient = () => {
-  if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error(
-      "Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY"
-    );
-  }
+  validateSupabaseConfig();
 
-  return createClient(supabaseUrl, supabaseServiceKey);
+  return createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
 };

@@ -1,9 +1,26 @@
 /**
- * Centralized API Configuration
- * Single source of truth for all API-related configuration
+ * Centralized Configuration
+ * Single source of truth for all application configuration and environment variables
  */
 
 import { baseSepolia } from "viem/chains";
+
+/**
+ * NextAuth Configuration
+ */
+export const NEXTAUTH_CONFIG = {
+  jwtPrivateKey: process.env.NEXTAUTH_JWT_PRIVATE_KEY || "",
+  jwtPublicKey: process.env.NEXTAUTH_JWT_PUBLIC_KEY || "",
+  url: process.env.NEXTAUTH_URL || "http://localhost:3000",
+} as const;
+
+/**
+ * Supabase Configuration
+ */
+export const SUPABASE_CONFIG = {
+  url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+} as const;
 
 /**
  * Dynamic Labs Configuration
@@ -60,8 +77,33 @@ export const RATE_LIMIT_CONFIG = {
 } as const;
 
 /**
+ * Application Configuration
+ */
+export const APP_CONFIG = {
+  env: process.env.NODE_ENV || "development",
+  isDevelopment: process.env.NODE_ENV === "development",
+  isProduction: process.env.NODE_ENV === "production",
+} as const;
+
+/**
  * Validation helpers
  */
+export function validateNextAuthConfig() {
+  const { jwtPrivateKey, jwtPublicKey } = NEXTAUTH_CONFIG;
+  if (!jwtPrivateKey || !jwtPublicKey) {
+    throw new Error("NextAuth JWT keys not configured");
+  }
+}
+
+export function validateSupabaseConfig() {
+  const { url, anonKey } = SUPABASE_CONFIG;
+  if (!url || !anonKey) {
+    throw new Error(
+      "Supabase credentials not configured. Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY"
+    );
+  }
+}
+
 export function validateDynamicConfig() {
   const { environmentId, authToken } = DYNAMIC_CONFIG;
   if (!environmentId || !authToken) {

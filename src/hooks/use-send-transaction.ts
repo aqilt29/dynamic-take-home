@@ -32,14 +32,6 @@ interface TransactionState {
 
 /**
  * Enhanced custom hook for sending ETH using ZeroDev gasless transactions
- *
- * Features:
- * - Race condition protection
- * - Memory leak prevention
- * - Enhanced address validation
- * - Better error handling
- * - Wallet address caching
- * - Request cancellation
  */
 export function useSendTransaction() {
   const [state, setState] = useState<TransactionState>({
@@ -166,16 +158,16 @@ export function useSendTransaction() {
       isExecutingRef.current = true;
 
       try {
-        // Clear previous state
+        // Validate BEFORE setting pending state to show errors immediately
+        const checksummedAddress = validateAddress(options.to);
+        const valueInWei = validateAmount(options.value);
+
+        // Set pending state after validation passes
         safeSetState({
           isPending: true,
           error: null,
           txHash: null,
         });
-
-        const checksummedAddress = validateAddress(options.to);
-
-        const valueInWei = validateAmount(options.value);
 
         const walletAddress = await getWalletAddress();
 
@@ -200,7 +192,7 @@ export function useSendTransaction() {
         }
 
         const {
-          data: { message, success, transactionHash },
+          data: { success, transactionHash },
         } = await response.json();
 
         if (!success) {

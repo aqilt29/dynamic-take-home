@@ -12,10 +12,7 @@ import {
   UserRow,
 } from "@/types/users.types";
 import { getSupabaseClient } from "@/lib/supabase-client";
-import { DYNAMIC_API_BASE } from "@/lib/constants";
-
-const environmentId = process.env.DYNAMIC_ENVIRONMENT_ID || "";
-const authToken = process.env.DYNAMIC_AUTH_TOKEN || "";
+import { DYNAMIC_CONFIG } from "@/lib/config";
 
 /**
  * UserService - Handles user-related business logic
@@ -209,11 +206,11 @@ export class UserService {
    * Private: Create user in Dynamic Labs
    */
   private static async createInDynamic(email: string): Promise<DynamicUser> {
-    const createUserUrl = `${DYNAMIC_API_BASE}/environments/${environmentId}/users`;
+    const createUserUrl = `${DYNAMIC_CONFIG.apiBase}/environments/${DYNAMIC_CONFIG.environmentId}/users`;
     const options = {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${authToken}`,
+        Authorization: `Bearer ${DYNAMIC_CONFIG.authToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -275,22 +272,3 @@ export class UserService {
     };
   }
 }
-
-/**
- * Legacy exports for backward compatibility
- * TODO: Remove these once all code is migrated to UserService
- */
-export const getUserByEmail = UserService.getByEmail;
-export const saveUser = UserService.save;
-export const createDynamicUser = UserService.create;
-
-// Also export transformation functions for backward compatibility
-export const userRowToStoredUser = (row: UserRow): StoredUser =>
-  UserService["mapToStoredUser"](row);
-
-export const dynamicUserToInsertDTO = (
-  user: DynamicUser,
-  authProvider: AuthProviders = AuthProviders.CREDENTIALS,
-  hashedPassword: string | null = null
-): UserInsertDTO =>
-  UserService["mapToInsertDTO"](user, authProvider, hashedPassword);

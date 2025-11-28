@@ -45,11 +45,6 @@ function SendTransactionContent() {
         return;
       }
 
-      console.log("Sending transaction:", {
-        to: recipientAddress,
-        value: amount,
-      });
-
       // Send transaction using the hook
       const txHash = await sendTransaction({
         to: recipientAddress,
@@ -136,7 +131,7 @@ function SendTransactionContent() {
         {/* Send Button */}
         <Button
           onClick={handleSendTransaction}
-          disabled={isPending || !recipientAddress || !amount}
+          disabled={isPending}
           className="w-full"
         >
           {isPending ? (

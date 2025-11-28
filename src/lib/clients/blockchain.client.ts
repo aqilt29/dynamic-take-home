@@ -4,7 +4,7 @@
  */
 
 import { createPublicClient, http, formatEther, type Address } from "viem";
-import { BLOCKCHAIN_CONFIG } from "@/lib/api/config";
+import { BLOCKCHAIN_CONFIG } from "@/lib/config";
 
 export interface WalletBalance {
   address: string;
