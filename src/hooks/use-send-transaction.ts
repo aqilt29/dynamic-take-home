@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { flushSync } from "react-dom";
 import { parseEther, isAddress, getAddress } from "viem";
 
 /**
@@ -151,22 +152,30 @@ export function useSendTransaction() {
    */
   const sendTransaction = useCallback(
     async (options: SendTransactionOptions): Promise<string> => {
-      if (isExecutingRef.current) {
-        throw new Error("A transaction is already in progress. Please wait.");
-      }
-
-      isExecutingRef.current = true;
-
       try {
-        // Validate BEFORE setting pending state to show errors immediately
+        // Validate FIRST (synchronous, fails fast)
         const checksummedAddress = validateAddress(options.to);
         const valueInWei = validateAmount(options.value);
 
-        // Set pending state after validation passes
-        safeSetState({
-          isPending: true,
-          error: null,
-          txHash: null,
+        // Check if already executing AFTER validation passes
+        if (isExecutingRef.current) {
+          throw new Error("A transaction is already in progress. Please wait.");
+        }
+
+        // Set lock
+        isExecutingRef.current = true;
+
+        // Force immediate render with flushSync to show loading state
+        // This ensures the UI updates before any async operations
+        flushSync(() => {
+          if (isMounted.current) {
+            setState((prev) => ({
+              ...prev,
+              isPending: true,
+              error: null,
+              txHash: null,
+            }));
+          }
         });
 
         const walletAddress = await getWalletAddress();

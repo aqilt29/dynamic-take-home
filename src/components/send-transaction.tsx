@@ -25,10 +25,14 @@ function SendTransactionContent() {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { sendTransaction, isPending } = useSendTransaction();
 
   const handleSendTransaction = async () => {
+    // Set loading state immediately (synchronous)
+    setIsSubmitting(true);
+
     try {
       setError(null);
       setSuccess(null);
@@ -36,12 +40,14 @@ function SendTransactionContent() {
       // Validate inputs
       if (!recipientAddress || !amount) {
         setError("Please fill in all fields");
+        setIsSubmitting(false);
         return;
       }
 
       const amountNum = parseFloat(amount);
       if (isNaN(amountNum) || amountNum <= 0) {
         setError("Invalid amount");
+        setIsSubmitting(false);
         return;
       }
 
@@ -62,6 +68,8 @@ function SendTransactionContent() {
       setError(
         err instanceof Error ? err.message : "Failed to send transaction"
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -85,7 +93,7 @@ function SendTransactionContent() {
             placeholder="0x..."
             value={recipientAddress}
             onChange={(e) => setRecipientAddress(e.target.value)}
-            disabled={isPending}
+            disabled={isPending || isSubmitting}
           />
         </div>
 
@@ -99,7 +107,7 @@ function SendTransactionContent() {
             placeholder="0.001"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            disabled={isPending}
+            disabled={isPending || isSubmitting}
           />
         </div>
 
@@ -131,10 +139,10 @@ function SendTransactionContent() {
         {/* Send Button */}
         <Button
           onClick={handleSendTransaction}
-          disabled={isPending}
+          disabled={isPending || isSubmitting}
           className="w-full"
         >
-          {isPending ? (
+          {isPending || isSubmitting ? (
             <>
               <div className="mr-2 size-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
               Sending...
