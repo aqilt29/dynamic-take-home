@@ -69,7 +69,7 @@ export default async function FAQs() {
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Think of it like getting an email address when you sign up
-                    for Gmail—it&apos;s instant, automatic, and requires no
+                    for Gmail it&apos;s instant, automatic, and requires no
                     technical understanding of email servers or SMTP protocols.
                   </p>
                 </AccordionContent>
@@ -136,7 +136,7 @@ export default async function FAQs() {
                   </p>
                   <ul className="ml-4 list-disc space-y-1 text-sm">
                     <li>
-                      No single point of failure—even if one server is
+                      No single point of failure even if one server is
                       compromised, keys remain secure
                     </li>
                     <li>
@@ -144,7 +144,7 @@ export default async function FAQs() {
                       GitHub) instead of managing keys
                     </li>
                     <li>
-                      Account recovery works like any other app—no lost seed
+                      Account recovery works like any other app no lost seed
                       phrases = lost funds
                     </li>
                   </ul>
@@ -278,7 +278,7 @@ export default async function FAQs() {
                   <p className="mt-3 text-sm text-muted-foreground">
                     Imagine if using Gmail required you to understand server
                     costs, estimate bandwidth usage, and pay in a special
-                    currency before sending each email—that&apos;s what
+                    currency before sending each email that&apos;s what
                     traditional crypto UX feels like to non-technical users.
                   </p>
                 </AccordionContent>
@@ -361,8 +361,8 @@ export default async function FAQs() {
                   <p>
                     Sponsored transactions (also called gasless or
                     meta-transactions) allow users to interact with blockchain
-                    applications without paying gas fees. Instead, a third
-                    party—in this case, your application—covers the costs.
+                    applications without paying gas fees. Instead, a third party
+                    in this case, your application covers the costs.
                   </p>
                   <div className="mt-3 rounded-lg bg-muted/50 p-4">
                     <p className="mb-2 font-semibold">Real-World Analogy:</p>
@@ -458,7 +458,7 @@ export default async function FAQs() {
                       <strong>Pricing Model:</strong> You pay ZeroDev monthly
                       based on usage (similar to AWS or Stripe). You can then
                       pass costs to users via subscriptions, ads, or absorb as
-                      customer acquisition cost—just like any SaaS business.
+                      customer acquisition cost just like any SaaS business.
                     </p>
                   </div>
                 </AccordionContent>
@@ -487,7 +487,7 @@ export default async function FAQs() {
                     <li>You maintain gas policy controls to prevent abuse</li>
                   </ul>
                   <p className="mt-3 text-sm text-muted-foreground">
-                    Think of it like Stripe preventing credit card fraud—the
+                    Think of it like Stripe preventing credit card fraud the
                     infrastructure handles security, while you define business
                     rules.
                   </p>
@@ -561,9 +561,9 @@ export default async function FAQs() {
                   <p className="font-semibold">Competitive Differentiation</p>
                   <p className="text-sm text-muted-foreground">
                     While competitors still require users to manage gas fees and
-                    understand crypto, you offer a seamless Web2-like
-                    experience—making your product significantly more accessible
-                    to mainstream users.
+                    understand crypto, you offer a seamless Web2-like experience
+                    making your product significantly more accessible to
+                    mainstream users.
                   </p>
                 </div>
               </div>
@@ -574,7 +574,7 @@ export default async function FAQs() {
                 <strong>This demo proves</strong> that blockchain applications
                 can deliver the same smooth user experience as traditional web
                 apps. Your users don&apos;t need to understand the underlying
-                technology—they just use it.
+                technology they just use it.
               </p>
             </div>
           </CardContent>
