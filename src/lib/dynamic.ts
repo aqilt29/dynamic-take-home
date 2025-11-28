@@ -43,7 +43,6 @@ export const createEmbeddedWallet = async (
     backUpToClientShareService: false,
   });
 
-  //@ts-expect-error
   const wallet: DBWallet = {
     ...baseWallet,
     userId,

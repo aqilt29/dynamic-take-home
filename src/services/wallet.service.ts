@@ -122,13 +122,3 @@ export class WalletService {
     return false;
   }
 }
-
-/**
- * Legacy singleton instance for backward compatibility
- * TODO: Remove once all code is migrated to static methods
- */
-export const walletService = {
-  getWalletDetails: WalletService.getBalance,
-  getBalances: WalletService.getBalances,
-  createEmbeddedWallet: WalletService.createForUser,
-};

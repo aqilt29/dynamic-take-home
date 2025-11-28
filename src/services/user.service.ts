@@ -272,22 +272,3 @@ export class UserService {
     };
   }
 }
-
-/**
- * Legacy exports for backward compatibility
- * TODO: Remove these once all code is migrated to UserService
- */
-export const getUserByEmail = UserService.getByEmail;
-export const saveUser = UserService.save;
-export const createDynamicUser = UserService.create;
-
-// Also export transformation functions for backward compatibility
-export const userRowToStoredUser = (row: UserRow): StoredUser =>
-  UserService["mapToStoredUser"](row);
-
-export const dynamicUserToInsertDTO = (
-  user: DynamicUser,
-  authProvider: AuthProviders = AuthProviders.CREDENTIALS,
-  hashedPassword: string | null = null
-): UserInsertDTO =>
-  UserService["mapToInsertDTO"](user, authProvider, hashedPassword);

@@ -47,7 +47,7 @@ export class ZeroDevService {
    */
   async createKernelClient(
     walletAddress: string,
-    externalServerKeyShares: ExternalServerKeyShareJSON
+    externalServerKeyShares: ExternalServerKeyShareJSON | ExternalServerKeyShareJSON[]
   ) {
     const authenticatedEvmClient = await getAuthenticatedEvmClient({
       authToken: this.authToken,
@@ -55,12 +55,17 @@ export class ZeroDevService {
     });
     const zerodevClient = await createZerodevClient(authenticatedEvmClient);
 
+    // Handle both single object and array formats
+    const keyShares = Array.isArray(externalServerKeyShares)
+      ? externalServerKeyShares[0]
+      : externalServerKeyShares;
+
     const kernelOptions: ZeroDevKernelOptions = {
       withSponsorship: ZERODEV_CONFIG.withSponsorship,
       networkId: ZERODEV_CONFIG.defaultNetworkId,
       address: walletAddress as `0x${string}`,
       // @ts-expect-error
-      externalServerKeyShares: externalServerKeyShares,
+      externalServerKeyShares: keyShares,
     };
 
     return await zerodevClient.createKernelClientForAddress(kernelOptions);

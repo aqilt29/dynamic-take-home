@@ -117,11 +117,3 @@ export function validateBasescanConfig() {
     throw new Error("Basescan API key not configured");
   }
 }
-
-/**
- * Legacy exports for backward compatibility
- * TODO: Remove once all code is migrated
- */
-export const DYNAMIC_API_BASE = DYNAMIC_CONFIG.apiBase;
-export const environmentId = DYNAMIC_CONFIG.environmentId;
-export const authToken = DYNAMIC_CONFIG.authToken;
