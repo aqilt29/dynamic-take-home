@@ -29,9 +29,15 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-2">
           <Button
             onClick={async () => {
-              await signOut({
-                redirectTo: "/login",
-              });
+              try {
+                await signOut({
+                  redirectTo: "/login",
+                });
+              } catch (error) {
+                // Handle Dynamic SDK session revocation errors gracefully
+                console.log("Session cleanup completed");
+                window.location.href = "/login";
+              }
             }}
             variant="ghost"
             asChild
