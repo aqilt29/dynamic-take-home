@@ -8,3 +8,4 @@ export * from "./wallet.service";
 export * from "./transaction.service";
 export * from "./zerodev.service";
 export * from "./delegation.service";
+export * from "./funding.service";

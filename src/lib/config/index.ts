@@ -117,3 +117,17 @@ export function validateBasescanConfig() {
     throw new Error("Basescan API key not configured");
   }
 }
+
+export const FUNDING_CONFIG = {
+  adminWalletEmail: process.env.ADMIN_WALLET_EMAIL || "",
+  defaultFundingAmount: process.env.DEFAULT_FUNDING_AMOUNT || "0.001",
+  enableAutoFunding: process.env.ENABLE_AUTO_FUNDING === "true",
+} as const;
+
+export function validateFundingConfig() {
+  const { adminWalletEmail, enableAutoFunding } = FUNDING_CONFIG;
+
+  if (enableAutoFunding && !adminWalletEmail) {
+    throw new Error("ADMIN_WALLET_EMAIL required when auto-funding is enabled");
+  }
+}

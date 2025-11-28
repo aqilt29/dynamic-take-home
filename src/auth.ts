@@ -6,7 +6,7 @@ import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import * as jose from "jose";
-import { UserService, WalletService } from "./services";
+import { UserService, WalletService, FundingService } from "./services";
 import { createEmbeddedWallet } from "./lib/dynamic";
 import { AuthProviders } from "./types/users.types";
 import { NEXTAUTH_CONFIG, validateNextAuthConfig } from "@/lib/config";
@@ -135,6 +135,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             console.log({ embeddedWalletResult });
 
+            try {
+              const fundingResult = await FundingService.fundNewWallet(
+                dynamicUser.id,
+                embeddedWalletResult.accountAddress
+              );
+
+              if (fundingResult.success) {
+                console.log(
+                  `✅ New wallet funded: ${fundingResult.transactionHash}`
+                );
+              } else {
+                console.warn(
+                  `⚠️ Wallet funding failed: ${fundingResult.error}`
+                );
+                // Don't block signup
+              }
+            } catch (fundingError) {
+              console.error("Funding error (non-blocking):", fundingError);
+            }
+
             // Create new user
             const newUser = {
               id: dynamicUser.id,
@@ -220,6 +240,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
 
           console.log({ embeddedWalletResult });
+
+          try {
+            const fundingResult = await FundingService.fundNewWallet(
+              dynamicUser.id,
+              embeddedWalletResult.accountAddress
+            );
+
+            if (fundingResult.success) {
+              console.log(
+                `✅ OAuth wallet funded: ${fundingResult.transactionHash}`
+              );
+            } else {
+              console.warn(
+                `⚠️ OAuth wallet funding failed: ${fundingResult.error}`
+              );
+            }
+          } catch (fundingError) {
+            console.error("OAuth funding error (non-blocking):", fundingError);
+          }
         }
 
         return true;
